@@ -10,7 +10,7 @@ interface Skill {
   name: string
   modifier: number
   hasAdvantage?: boolean;
-  label:string;
+  label: string;
 }
 
 interface Action {
@@ -27,7 +27,9 @@ interface Action {
   savingThrow?: {
     attribute: "fortitude" | "cunning" | "reflexes" | "willpower"
     dc: number
-  }
+  };
+  cost?: number;
+  actions?: number;
 }
 
 

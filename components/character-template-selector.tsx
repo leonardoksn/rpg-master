@@ -19,7 +19,7 @@ import { Copy, UserPlus } from "lucide-react"
 import { useState } from "react"
 
 interface CharacterTemplateSelectorProps {
-    availableCharacters: Record<string, ICharacterData>
+    availableCharacters?: Record<string, ICharacterData>
     onAddCharacters: (characters: Character[]) => void
 }
 
@@ -30,7 +30,7 @@ export function CharacterTemplateSelector({ availableCharacters, onAddCharacters
     const [nameSuffix, setNameSuffix] = useState<string>("")
     const [dialogOpen, setDialogOpen] = useState<boolean>(false)
 
-    const selectedCharacter = availableCharacters[selectedCharacterId];
+    const selectedCharacter = availableCharacters?.[selectedCharacterId];
 
     const handleAddCharacters = () => {
         if (!selectedCharacter) return
@@ -52,6 +52,10 @@ export function CharacterTemplateSelector({ availableCharacters, onAddCharacters
             const newCharacter: Character = {
                 ...newCharacterClone,
                 conditions: [],
+                integrity: {
+                    current: 100,
+                    max: 100
+                },
                 health: {
                     current: newCharacterClone.maxHp,
                     max: newCharacterClone.maxHp,
@@ -76,7 +80,7 @@ export function CharacterTemplateSelector({ availableCharacters, onAddCharacters
         setNamePrefix("")
         setNameSuffix("")
     }
-    const availableCharactersArray = Object.keys(availableCharacters);
+    const availableCharactersArray = Object.keys(availableCharacters ?? {});
     return (
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
@@ -102,7 +106,7 @@ export function CharacterTemplateSelector({ availableCharacters, onAddCharacters
                             <SelectContent>
                                 {availableCharactersArray.map((id) => (
                                     <SelectItem key={id} value={id}>
-                                        {availableCharacters[id].name} ({availableCharacters[id].type})
+                                        {availableCharacters?.[id].name} ({availableCharacters?.[id].type})
                                     </SelectItem>
                                 ))}
                             </SelectContent>

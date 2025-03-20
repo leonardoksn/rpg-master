@@ -13,6 +13,10 @@ interface Character {
     current: number
     max: number
   }
+  integrity: {
+    current: number
+    max: number
+  }
   energy?: {
     current: number
     max: number
@@ -55,7 +59,7 @@ interface Character {
   reactions: Action[]
   passives: PassiveAbility[]
 
-  conditions: string[]
+  conditions: Condition[]
   notes: string
 }
 
@@ -87,7 +91,9 @@ interface CombatLog {
   characterId: string
   characterName: string
   action: string
-  actionTiming?: ActionTiming
+  actionTiming?: ActionTiming;
+  temporaryHP?: number;
+  healing?: number;
   target?: {
     id: string
     name: string
@@ -95,7 +101,19 @@ interface CombatLog {
   details: string
   result: "hit" | "miss" | "save" | "fail" | "other"
   damage?: number
-  timestamp: string
+  timestamp: string;
+  conditionChange?: {
+    removed?: ConditionType[];
+    added?: ConditionType[];
+  };
+  integrityChange?: {
+    oldValue: number;
+    newValue: number;
+  };
+  armorClassChange?: {
+    oldValue: number;
+    newValue: number;
+  };
 }
 
 interface DiceRoll {

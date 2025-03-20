@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Trash2, ChevronDown, ChevronUp, Edit, Save, X } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { ChevronDown, ChevronUp, Edit, Plus, Save, Trash2, X } from "lucide-react"
+import { useState } from "react"
 
 interface PassiveAbilityManagerProps {
   passives: PassiveAbility[]
@@ -109,9 +109,8 @@ export function PassiveAbilityManager({ passives, onChange }: PassiveAbilityMana
             <Card key={passive.id} className="overflow-hidden">
               <CardContent className="p-0">
                 <div
-                  className={`p-3 border-b flex justify-between items-center cursor-pointer ${
-                    expandedId === passive.id ? "bg-accent/50" : ""
-                  }`}
+                  className={`p-3 border-b flex justify-between items-center cursor-pointer ${expandedId === passive.id ? "bg-accent/50" : ""
+                    }`}
                   onClick={() => toggleExpand(passive.id)}
                 >
                   <div className="flex items-center gap-2">
@@ -218,20 +217,20 @@ export function PassiveAbilityManager({ passives, onChange }: PassiveAbilityMana
       {editingId === "new" ? (
         <Card>
           <CardContent className="p-4 space-y-4">
-            <h3 className="font-medium">New Passive Ability</h3>
+            <h3 className="font-medium">Nova habilidade passiva</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="new-passive-name">Name</Label>
+                <Label htmlFor="new-passive-name">Nome</Label>
                 <Input
                   id="new-passive-name"
                   value={formState.name}
                   onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-                  placeholder="Passive ability name"
+                  placeholder="Nome da habilidade passiva"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="new-passive-uses">Uses Per Day</Label>
+                <Label htmlFor="new-passive-uses">Usos por dia</Label>
                 <Input
                   id="new-passive-uses"
                   type="number"
@@ -243,29 +242,29 @@ export function PassiveAbilityManager({ passives, onChange }: PassiveAbilityMana
                       usesPerDay: e.target.value === "" ? undefined : Number.parseInt(e.target.value),
                     })
                   }
-                  placeholder="Leave empty for unlimited"
+                  placeholder="Deixe em branco para ilimitado"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="new-passive-desc">Description</Label>
+              <Label htmlFor="new-passive-desc">Descrição</Label>
               <Textarea
                 id="new-passive-desc"
                 value={formState.description}
                 onChange={(e) => setFormState({ ...formState, description: e.target.value })}
-                placeholder="Describe what this passive ability does"
+                placeholder="Descreva o que essa habilidade passiva faz"
               />
             </div>
 
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={handleCancelEdit}>
                 <X className="mr-2 h-4 w-4" />
-                Cancel
+                Cancelar
               </Button>
               <Button onClick={handleAddPassive}>
                 <Save className="mr-2 h-4 w-4" />
-                Add Passive Ability
+                Adicionar habilidade passiva
               </Button>
             </div>
           </CardContent>
@@ -285,7 +284,7 @@ export function PassiveAbilityManager({ passives, onChange }: PassiveAbilityMana
           }}
         >
           <Plus className="mr-2 h-4 w-4" />
-          Add Passive Ability
+          Adicionar habilidade passiva
         </Button>
       )}
     </div>

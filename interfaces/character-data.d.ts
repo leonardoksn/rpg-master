@@ -1,7 +1,8 @@
 interface ICharacterData {
   name: string
   type: CharacterType
-  class: string
+  class: string;
+  integrity?: number;
   level: number
   maxHp: number
   maxEp: number

@@ -19,10 +19,10 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
+
 export default function NewCharacterPage() {
   const router = useRouter()
   const [characterType, setCharacterType] = useState<CharacterType>("PC")
-  const [characterClass, setCharacterClass] = useState<number>(0)
   const [characterSize, setCharacterSize] = useState<CharacterSize>("Medium")
   const [attributesSaves, setAttributesSaves] = useState({
     attributes: {
@@ -127,6 +127,7 @@ export default function NewCharacterPage() {
     const data: ICharacterData = {
       name: formData.get("name") as string,
       type: characterType,
+      integrity: formData.get("integrity") ? parseInt(formData.get("integrity") as string) : undefined ,
       class: formData.get("class") as string,
       level: parseInt(formData.get("level") as string) || 1,
       maxHp: parseInt(formData.get("maxHp") as string),
@@ -143,14 +144,14 @@ export default function NewCharacterPage() {
       passives: passives,
       attributes: attributesSaves.attributes,
       saves: attributesSaves.saves,
-      otherStats: attributesSaves.others
+      otherStats: attributesSaves.others,
     };
 
 
     try {
       // Call the createCharacter action with the collected data
       await createCharacter(data);
-      // router.push("/characters");
+      router.push("/characters");
     } catch (error) {
       console.error("Error creating character:", error);
       // Here you could add error handling, like showing a toast notification
@@ -215,6 +216,10 @@ export default function NewCharacterPage() {
                 <div className="space-y-2">
                   <Label htmlFor="maxHp">HP máximo</Label>
                   <Input id="maxHp" name="maxHp" type="number" min="1" placeholder="Insira HP máximo" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="integrity">Integridade na alma</Label>
+                  <Input id="integrity" name="integrity" type="number" min="1" placeholder="Insira a integridade" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="maxEp">PE máximo</Label>

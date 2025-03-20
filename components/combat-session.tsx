@@ -7,16 +7,21 @@ import { updateRound } from "@/actions/combat/update-round"
 import { CharacterActionPanel } from "@/components/character-action-panel"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, ArrowRight, ClipboardCopy, Heart, MinusCircle, PlusCircle, SkipForward, Undo, UserPlus, Zap } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { CONDITIONS } from "@/lib/constants"
+import { ArrowLeft, ClipboardCopy, SkipForward } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
+import { AddCharacterDialog } from "./add-character-dialog"
+import CombatSessionCharacterCard from "./combat-session-character-card"
+import { CombatSessionLogs } from "./combat-session-logs"
 import { DiceRoller } from "./dice-roller"
 
-export default function CombatSession({ combatSession }: { combatSession: CombatSession }) {
+export default function CombatSession({ combatSession, availableCharacters }: { combatSession: CombatSession; availableCharacters?: Record<string, ICharacterData> | undefined }) {
     // In a real app, we would fetch the combat session by ID
+    const router = useRouter();
 
     const [round, setRound] = useState(combatSession.round)
     const [activeIndex, setActiveIndex] = useState(combatSession.activeCharacterIndex)
@@ -35,24 +40,64 @@ export default function CombatSession({ combatSession }: { combatSession: Combat
             setActiveIndex(0)
 
             // Reset action usage for all characters at the start of a new round
-            const resetCharacters = characters.map((char) => ({
-                ...char,
-                actionsUsed: 0,
-                bonusActionsUsed: 0,
-                reactionsUsed: 0,
-                actions: char.actions.map((action) => ({
-                    ...action,
-                    currentUses: 0,
-                })),
-                bonusActions: char.bonusActions.map((action) => ({
-                    ...action,
-                    currentUses: 0,
-                })),
-                reactions: char.reactions.map((action) => ({
-                    ...action,
-                    currentUses: 0,
-                })),
-            }))
+            const resetCharacters = characters.map((char) => {
+
+                const updatedConditions: Condition[] = []
+                char.conditions.forEach((condition) => {
+                    if (condition.duration === undefined) {
+                        updatedConditions.push(condition)
+                        return
+                    } // Keep indefinite conditions
+                    if (condition.duration > 1) {
+                        // Reduce duration by 1
+                        updatedConditions.push({ ...condition, duration: condition.duration - 1 })
+                        return
+                    }
+                    return
+                })
+                const removedConditions = char.conditions.filter((c) => c.duration === 1).map((c) => c.type)
+                if (removedConditions.length > 0) {
+                    const newLog: CombatLog = {
+                        id: `log-${Date.now()}-conditions`,
+                        round,
+                        turn: activeIndex + 1,
+                        characterId: char.id,
+                        characterName: char.name,
+                        action: "Condição expirada",
+                        details: `Condições expiradas: ${removedConditions
+                            .map((c) => CONDITIONS[c])
+                            .join(", ")}`,
+                        result: "other",
+                        conditionChange: {
+                            removed: removedConditions as ConditionType[],
+                        },
+                        timestamp: new Date().toISOString(),
+                    }
+                    setLogs((logs) => [...logs, newLog])
+                    updateCombatLog(combatSession.id, [...logs, newLog])
+
+                }
+
+                return {
+                    ...char,
+                    actionsUsed: 0,
+                    conditions: updatedConditions,
+                    bonusActionsUsed: 0,
+                    reactionsUsed: 0,
+                    actions: char.actions.map((action) => ({
+                        ...action,
+                        currentUses: 0,
+                    })),
+                    bonusActions: char.bonusActions.map((action) => ({
+                        ...action,
+                        currentUses: 0,
+                    })),
+                    reactions: char.reactions.map((action) => ({
+                        ...action,
+                        currentUses: 0,
+                    })),
+                }
+            })
             setCharacters(resetCharacters);
             await updateCombatCharacter(combatSession.id, resetCharacters);
             await updateRound(combatSession.id, round + 1);
@@ -105,9 +150,7 @@ export default function CombatSession({ combatSession }: { combatSession: Combat
         let updatedCharacters: CombatCharacter[] = [];
         if (target && attackRoll && attackRoll >= target.ac && damage) {
             updatedCharacters = characters.map((c) => {
-
                 if (c.id === target.id) {
-                    console.log(c)
                     const exceededDamage = Number(c.health.temporary ?? 0) - damage;
                     if (exceededDamage > 0) {
                         return {
@@ -199,6 +242,27 @@ export default function CombatSession({ combatSession }: { combatSession: Combat
             }
             return c
         })
+        if (amount !== 0) {
+            const character = characters.find((c) => c.id === characterId)
+            if (character) {
+                const newLog: CombatLog = {
+                    id: `log-${Date.now()}`,
+                    round,
+                    turn: activeIndex + 1,
+                    characterId,
+                    characterName: character.name,
+                    action: amount > 0 ? "Cura" : "Dano",
+                    details: `${amount > 0 ? "Curado" : "Tomou"} ${Math.abs(amount)} ${amount > 0 ? "pontos de vida" : "dano"}`,
+                    result: "other",
+                    healing: amount > 0 ? amount : undefined,
+                    damage: amount < 0 ? Math.abs(amount) : undefined,
+                    timestamp: new Date().toISOString(),
+                }
+                setLogs([...logs, newLog])
+                updateCombatLog(combatSession.id, [...logs, newLog])
+            }
+        }
+
         setCharacters(updatedCharacters)
         updateCombatCharacter(combatSession.id, updatedCharacters)
 
@@ -255,6 +319,191 @@ export default function CombatSession({ combatSession }: { combatSession: Combat
         setCharacters(updatedCharacters)
         updateCombatCharacter(combatSession.id, updatedCharacters)
     }
+
+    const adjustIntegrity = (characterId: string, amount: number) => {
+        const character = characters.find((c) => c.id === characterId)
+        if (!character || !character.integrity) return
+
+        const oldValue = character.integrity.current
+        const newValue = Math.min(character.integrity.max, Math.max(0, oldValue + amount))
+
+        const updatedCharacters = characters.map((c) => {
+            if (c.id === characterId) {
+                return {
+                    ...c,
+                    integrity: {
+                        ...c.integrity!,
+                        current: newValue,
+                    },
+                }
+            }
+            return c
+        })
+        setCharacters(updatedCharacters)
+
+        // Log integrity change
+        if (amount !== 0) {
+            const newLog: CombatLog = {
+                id: `log-${Date.now()}-integrity`,
+                round,
+                turn: activeIndex + 1,
+                characterId,
+                characterName: character.name,
+                action: "Integrity Change",
+                details: `${amount > 0 ? "Gained" : "Lost"} ${Math.abs(amount)} integrity points`,
+                result: "other",
+                integrityChange: {
+                    oldValue,
+                    newValue,
+                },
+                timestamp: new Date().toISOString(),
+            }
+            setLogs([...logs, newLog])
+            updateCombatLog(combatSession.id, [...logs, newLog])
+        }
+
+        updateCombatCharacter(combatSession.id, updatedCharacters)
+    }
+
+    const updateArmorClass = (characterId: string, newAC: number) => {
+        const character = characters.find((c) => c.id === characterId)
+        if (!character) return
+
+        const oldAC = character.ac
+
+        const updatedCharacters = characters.map((c) => {
+            if (c.id === characterId) {
+                return {
+                    ...c,
+                    ac: newAC,
+                }
+            }
+            return c
+        })
+        setCharacters(updatedCharacters)
+
+        // Log AC change
+        const newLog: CombatLog = {
+            id: `log-${Date.now()}-ac`,
+            round,
+            turn: activeIndex + 1,
+            characterId,
+            characterName: character.name,
+            action: "Mudança de classe de armadura",
+            details: `Classe de armadura alterada de ${oldAC} para ${newAC}`,
+            result: "other",
+            armorClassChange: {
+                oldValue: oldAC,
+                newValue: newAC,
+            },
+            timestamp: new Date().toISOString(),
+        }
+        setLogs([...logs, newLog])
+        updateCombatCharacter(combatSession.id, updatedCharacters)
+        updateCombatLog(combatSession.id, [...logs, newLog])
+
+    }
+
+
+    const addCondition = (characterId: string, condition: Condition) => {
+        const character = characters.find((c) => c.id === characterId)
+        if (!character) return
+
+        // Check if condition already exists
+        const existingCondition = character.conditions.find((c) => c.type === condition.type)
+        if (existingCondition) {
+            // Replace existing condition
+            const updatedCharacters = characters.map((c) => {
+                if (c.id === characterId) {
+                    return {
+                        ...c,
+                        conditions: c.conditions.map((cond) => (cond.type === condition.type ? condition : cond)),
+                    }
+                }
+                return c
+            })
+            setCharacters(updatedCharacters)
+            updateCombatCharacter(combatSession.id, updatedCharacters)
+
+        } else {
+            // Add new condition
+            const updatedCharacters = characters.map((c) => {
+                if (c.id === characterId) {
+                    return {
+                        ...c,
+                        conditions: [...c.conditions, condition],
+                    }
+                }
+                return c
+            })
+            setCharacters(updatedCharacters)
+            updateCombatCharacter(combatSession.id, updatedCharacters)
+
+        }
+
+        // Log condition addition
+        const conditionLabel = CONDITIONS[condition.type]
+        const newLog: CombatLog = {
+            id: `log-${Date.now()}-condition`,
+            round,
+            turn: activeIndex + 1,
+            characterId,
+            characterName: character.name,
+            action: "Condição aplicada",
+            details: `Aplicou a condição "${conditionLabel}"${condition.duration ? ` para ${condition.duration} rodadas` : ""}${condition.source ? ` de ${condition.source}` : ""}`,
+            result: "other",
+            conditionChange: {
+                added: [condition.type],
+            },
+            timestamp: new Date().toISOString(),
+        }
+        setLogs([...logs, newLog])
+
+        updateCombatLog(combatSession.id, [...logs, newLog])
+    }
+
+
+    const removeCondition = (characterId: string, conditionType: ConditionType) => {
+        const character = characters.find((c) => c.id === characterId)
+        if (!character) return
+
+        const conditionExists = character.conditions.some((c) => c.type === conditionType)
+        if (!conditionExists) return
+
+        const updatedCharacters = characters.map((c) => {
+            if (c.id === characterId) {
+                return {
+                    ...c,
+                    conditions: c.conditions.filter((cond) => cond.type !== conditionType),
+                }
+            }
+            return c
+        })
+        setCharacters(updatedCharacters)
+
+        // Log condition removal
+        const conditionLabel = CONDITIONS[conditionType]
+        const newLog: CombatLog = {
+            id: `log-${Date.now()}-condition-remove`,
+            round,
+            turn: activeIndex + 1,
+            characterId,
+            characterName: character.name,
+            action: "Condition Removed",
+            details: `Removed "${conditionLabel}" condition`,
+            result: "other",
+            conditionChange: {
+                removed: [conditionType],
+            },
+            timestamp: new Date().toISOString(),
+        }
+        setLogs([...logs, newLog])
+
+        updateCombatCharacter(combatSession.id, updatedCharacters)
+        updateCombatLog(combatSession.id, [...logs, newLog])
+    }
+
+
 
     const undoLastAction = () => {
         if (logs.length === 0) return
@@ -327,6 +576,8 @@ export default function CombatSession({ combatSession }: { combatSession: Combat
         })
 
         setCharacters(updatedCharacters)
+        updateCombatCharacter(combatSession.id, updatedCharacters)
+        updateCombatLog(combatSession.id, logs.slice(0, -1))
     }
 
     const copyIniciative = () => {
@@ -345,6 +596,109 @@ export default function CombatSession({ combatSession }: { combatSession: Combat
             })
         });
 
+    }
+
+    const addTemporaryHP = (characterId: string, amount: number) => {
+        const updatedCharacters = characters.map((c) => {
+            if (c.id === characterId) {
+                // Only replace temporary HP if the new amount is higher
+                const currentTempHP = c.health.temporary || 0
+                const newTempHP = amount > currentTempHP ? amount : currentTempHP
+
+                return {
+                    ...c,
+                    health: {
+                        ...c.health,
+                        temporary: newTempHP,
+                    },
+                }
+            }
+            return c
+        })
+        setCharacters(updatedCharacters)
+        updateCombatCharacter(combatSession.id, updatedCharacters)
+
+        // Log the temporary HP addition
+        const character = characters.find((c) => c.id === characterId)
+        if (character) {
+            const currentTempHP = character.health.temporary || 0
+            const newLog: CombatLog = {
+                id: `log-${Date.now()}`,
+                round,
+                turn: activeIndex + 1,
+                characterId,
+                characterName: character.name,
+                action: "Temporary HP",
+                details:
+                    amount > currentTempHP
+                        ? `Gained ${amount} pontos de vida temporários`
+                        : `Tentou adicionar ${amount} pontos de vida temporários (não maior que ${currentTempHP} atual)`,
+                result: "other",
+                temporaryHP: amount > currentTempHP ? amount : undefined,
+                timestamp: new Date().toISOString(),
+            }
+            setLogs([...logs, newLog]);
+            updateCombatLog(combatSession.id, [...logs, newLog])
+        }
+    }
+    const handleAddCharacterFromDialog = async (newCharacter: CombatCharacter) => {
+        // Add the character to the combat
+        setCharacters([...characters, newCharacter].sort((a, b) => b.initiativeRoll - a.initiativeRoll))
+        updateCombatCharacter(combatSession.id, [...characters, newCharacter].sort((a, b) => b.initiativeRoll - a.initiativeRoll))
+        // Log the addition
+        const newLog: CombatLog = {
+            id: `log-${Date.now()}-add-character`,
+            round,
+            turn: activeIndex + 1,
+            characterId: newCharacter.id,
+            characterName: newCharacter.name,
+            action: "Joined Combat",
+            details: `Added to combat with initiative ${newCharacter.initiativeRoll}`,
+            result: "other",
+            timestamp: new Date().toISOString(),
+        }
+        setLogs([...logs, newLog])
+        await updateCombatLog(combatSession.id, [...logs, newLog])
+    }
+
+    // Then, add a function to handle removing a character
+    const removeCharacterFromCombat = async (characterId: string) => {
+        // Find the character
+        const character = characters.find((c) => c.id === characterId)
+        if (!character) return
+
+        // Remove the character
+        setCharacters(characters.filter((c) => c.id !== characterId))
+        await updateCombatCharacter(combatSession.id, characters.filter((c) => c.id !== characterId))
+        // Log the removal
+        const newLog: CombatLog = {
+            id: `log-${Date.now()}-remove-character`,
+            round,
+            turn: activeIndex + 1,
+            characterId: "system",
+            characterName: "System",
+            action: "Character Removed",
+            details: `${character.name} was removed from combat`,
+            result: "other",
+            timestamp: new Date().toISOString(),
+        }
+        setLogs([...logs, newLog])
+        await updateCombatLog(combatSession.id, [...logs, newLog])
+
+
+        // If the active character was removed, move to the next character
+        if (characterId === activeCharacter.id) {
+            // If this was the last character, go back to the first
+            if (activeIndex >= characters.length - 1) {
+                setActiveIndex(0)
+            }
+            // Otherwise, the activeIndex stays the same but points to the next character
+        }
+
+        // If the selected character was removed, clear the selection
+        if (characterId === selectedCharacterId) {
+            setSelectedCharacterId(null)
+        }
 
     }
 
@@ -394,6 +748,11 @@ export default function CombatSession({ combatSession }: { combatSession: Combat
                         </CardHeader>
                         <CardContent>
                             <CharacterActionPanel
+                                onAddCondition={addCondition}
+                                onRemoveCondition={removeCondition}
+                                onUpdateAC={updateArmorClass}
+                                onAddTempHP={addTemporaryHP}
+                                onAdjustIntegrity={adjustIntegrity}
                                 onHandleAddTempHP={handleTemporaryHp}
                                 character={selectedCharacter}
                                 allCharacters={characters}
@@ -402,54 +761,7 @@ export default function CombatSession({ combatSession }: { combatSession: Combat
                             />
                         </CardContent>
                     </Card>
-
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardTitle>Registro de Combate</CardTitle>
-                            <CardDescription>Ações e eventos recentes</CardDescription>
-                        </CardHeader>
-                        <CardContent className="max-h-[300px] overflow-y-auto">
-                            {logs.length === 0 ? (
-                                <p className="text-center text-muted-foreground py-4">Nenhuma ação tomada ainda</p>
-                            ) : (
-                                <div className="space-y-2">
-                                    {logs
-                                        .slice()
-                                        .reverse()
-                                        .map((log) => (
-                                            <div key={log.id} className="p-2 border rounded-md">
-                                                <div className="flex justify-between text-sm">
-                                                    <span className="font-medium">
-                                                        Rodada {log.round}, Turno {log.turn}
-                                                    </span>
-                                                    <div className="flex items-center gap-2">
-                                                        {log.actionTiming && <Badge variant="outline">{log.actionTiming}</Badge>}
-                                                        <Badge variant={log.result === "hit" ? "default" : "secondary"}>{log.result}</Badge>
-                                                    </div>
-                                                </div>
-                                                <p className="mt-1">
-                                                    <span className="font-medium">{log.characterName}</span> usou{" "}
-                                                    <span className="italic">{log.action}</span>
-                                                    {log.target && (
-                                                        <>
-                                                            {" "}
-                                                            on <span className="font-medium">{log.target.name}</span>
-                                                        </>
-                                                    )}
-                                                </p>
-                                                <p className="text-sm text-muted-foreground">{log.details}</p>
-                                                {log.damage && <p className="text-sm font-medium text-red-500">Dano: {log.damage}</p>}
-                                            </div>
-                                        ))}
-                                </div>
-                            )}
-                        </CardContent>
-                        <CardFooter>
-                            <Button variant="outline" size="sm" disabled={logs.length === 0} onClick={undoLastAction}>
-                                <Undo className="mr-2 h-4 w-4" /> Desfazer última ação
-                            </Button>
-                        </CardFooter>
-                    </Card>
+                    <CombatSessionLogs logs={logs} undoLastAction={undoLastAction} />
                 </div>
 
                 <div className="space-y-68">
@@ -465,91 +777,23 @@ export default function CombatSession({ combatSession }: { combatSession: Combat
                         <CardContent>
                             <div className="space-y-2">
                                 {characters.map((character, index) => (
-                                    <div
+                                    <CombatSessionCharacterCard
+                                        removeCharacterFromCombat={removeCharacterFromCombat}
+                                        addTemporaryHP={addTemporaryHP}
+                                        adjustIntegrity={adjustIntegrity}
+                                        addCondition={addCondition}
+                                        removeCondition={removeCondition}
+                                        updateArmorClass={updateArmorClass}
                                         key={character.id}
-                                        className={`p-2 border rounded-md flex justify-between items-center cursor-pointer ${index === activeIndex ? "bg-accent" : ""
-                                            } ${character.id === selectedCharacterId ? "border-primary" : ""}`}
-                                        onClick={() => setSelectedCharacterId(character.id)}
-                                    >
-                                        <div className="flex items-center">
-                                            {index === activeIndex && <ArrowRight className="mr-2 h-4 w-4 text-primary" />}
-                                            <div>
-                                                <div className="font-medium">{character.name}</div>
-                                                <div className="text-xs text-muted-foreground">Initiativa: {character.initiativeRoll}</div>
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-col gap-1">
-                                            <div className="flex items-center space-x-1">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-6 w-6"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        adjustHealth(character.id, -1);
-                                                    }}
-                                                >
-                                                    <MinusCircle className="h-3 w-3 text-red-500" />
-                                                </Button>
-                                                <div className="w-18 text-center text-xs flex items-center justify-center">
-                                                    <Heart className="inline-block h-3 w-3 mr-1" />
-                                                    <input
-                                                        type="number"
-                                                        className="w-12 text-center text-xs border rounded"
-                                                        value={character.health.current}
-                                                        onChange={(e) => handleChange(character.id, Number(e.currentTarget.value))}
-                                                        min={0}
-                                                        max={character.health.max}
-                                                    />
-                                                    <span className="ml-1">/{character.health.max}  </span>{
-                                                        !!character.health.temporary &&
-                                                        <span className="ml-1 text-blue-500">+({character.health.temporary})</span>
-                                                    }
-                                                </div>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-6 w-6"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        adjustHealth(character.id, 1);
-                                                    }}
-                                                >
-                                                    <PlusCircle className="h-3 w-3 text-green-500" />
-                                                </Button>
-                                            </div>
-                                            {character.energy && (
-                                                <div className="flex items-center space-x-1">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-6 w-6"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation()
-                                                            adjustEnergy(character.id, -1)
-                                                        }}
-                                                    >
-                                                        <MinusCircle className="h-3 w-3 text-blue-500" />
-                                                    </Button>
-                                                    <div className="w-16 text-center text-xs">
-                                                        <Zap className="inline-block h-3 w-3 mr-1" />
-                                                        {character.energy.current}/{character.energy.max}
-                                                    </div>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-6 w-6"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation()
-                                                            adjustEnergy(character.id, 1)
-                                                        }}
-                                                    >
-                                                        <PlusCircle className="h-3 w-3 text-yellow-500" />
-                                                    </Button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
+                                        activeIndex={activeIndex}
+                                        adjustEnergy={adjustEnergy}
+                                        adjustHealth={adjustHealth}
+                                        character={character}
+                                        handleChange={handleChange}
+                                        index={index}
+                                        setSelectedCharacterId={setSelectedCharacterId}
+                                        selectedCharacterId={selectedCharacterId}
+                                    />
                                 ))}
                             </div>
                         </CardContent>
@@ -563,27 +807,16 @@ export default function CombatSession({ combatSession }: { combatSession: Combat
                         <CardContent>
                             <div className="space-y-4">
                                 <div>
-                                    <h3 className="text-sm font-medium mb-2">Rolar Dados</h3>
+                                    <h3 className="text-sm font-medium mb-2">Roll Dice</h3>
                                     <DiceRoller />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <h3 className="text-sm font-medium mb-2">Adicione personagem ao combate</h3>
-                                    <div className="flex space-x-2">
-                                        <Select>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select character" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="new">Criar novo</SelectItem>
-                                                {/* List available characters not in combat */}
-                                            </SelectContent>
-                                        </Select>
-                                        <Button variant="outline">
-                                            <UserPlus className="mr-2 h-4 w-4" />
-                                            Adicionar
-                                        </Button>
-                                    </div>
+                                    <h3 className="text-sm font-medium mb-2">Adicionar personagem ao combate</h3>
+                                    <AddCharacterDialog
+                                        availableCharacters={availableCharacters}
+                                        onAddCharacter={handleAddCharacterFromDialog}
+                                    />
                                 </div>
                             </div>
                         </CardContent>

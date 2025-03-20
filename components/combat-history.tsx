@@ -62,19 +62,19 @@ export default function CombatHistoryDetail({ combatSession, id }: { combatSessi
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center mb-6">
                   <div className="p-4 bg-muted rounded-md">
-                    <div className="text-sm text-muted-foreground">Rounds</div>
+                    <div className="text-sm text-muted-foreground">Rodadas</div>
                     <div className="text-2xl font-bold">{combatSession.round}</div>
                   </div>
                   <div className="p-4 bg-muted rounded-md">
-                    <div className="text-sm text-muted-foreground">Participants</div>
+                    <div className="text-sm text-muted-foreground">Participantes</div>
                     <div className="text-2xl font-bold">{combatSession.characters.length}</div>
                   </div>
                   <div className="p-4 bg-muted rounded-md">
-                    <div className="text-sm text-muted-foreground">Actions</div>
+                    <div className="text-sm text-muted-foreground">Ações</div>
                     <div className="text-2xl font-bold">{combatSession.logs.length}</div>
                   </div>
                   <div className="p-4 bg-muted rounded-md">
-                    <div className="text-sm text-muted-foreground">Duration</div>
+                    <div className="text-sm text-muted-foreground">Duração</div>
                     <div className="text-2xl font-bold">--:--</div>
                   </div>
                 </div>
@@ -214,7 +214,7 @@ export default function CombatHistoryDetail({ combatSession, id }: { combatSessi
                             </span>
                           </div>
                           <div className="flex flex-col items-center">
-                            <span className="text-xs text-muted-foreground">AC</span>
+                            <span className="text-xs text-muted-foreground">CA</span>
                             <span className="font-bold">{character.ac}</span>
                           </div>
                         </div>
@@ -222,7 +222,7 @@ export default function CombatHistoryDetail({ combatSession, id }: { combatSessi
 
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         <div>
-                          <h4 className="text-sm font-medium mb-1">Actions</h4>
+                          <h4 className="text-sm font-medium mb-1">Ações</h4>
                           <ul className="text-sm text-muted-foreground">
                             {character.actions.map((action) => (
                               <li key={action.id}>{action.name}</li>
@@ -266,11 +266,11 @@ export default function CombatHistoryDetail({ combatSession, id }: { combatSessi
       <div className="flex justify-end">
         {combatSession.status === "active" ? (
           <Button asChild>
-            <Link href={`/combat/${combatSession.id}`}>Continue Combat</Link>
+            <Link href={`/combat/${combatSession.id}`}>Continuar Combate</Link>
           </Button>
         ) : (
           <Button variant="outline" asChild>
-            <Link href="/combat/new">Start New Combat</Link>
+            <Link href="/combat/new">Iniciar novo combate</Link>
           </Button>
         )}
       </div>

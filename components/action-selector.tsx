@@ -60,9 +60,9 @@ export function ActionSelector({ character, targets, onActionComplete }: ActionS
     <div className="space-y-4">
       <Tabs defaultValue="action" onValueChange={(value) => setActionType(value as ActionTiming)}>
         <TabsList className="grid grid-cols-3">
-          <TabsTrigger value="action">Actions</TabsTrigger>
-          <TabsTrigger value="bonus">Bonus Actions</TabsTrigger>
-          <TabsTrigger value="reaction">Reactions</TabsTrigger>
+          <TabsTrigger value="action">Ações</TabsTrigger>
+          <TabsTrigger value="bonus">Ações Bônus</TabsTrigger>
+          <TabsTrigger value="reaction">Reações</TabsTrigger>
         </TabsList>
 
         <TabsContent value="action" className="space-y-4">
@@ -102,7 +102,7 @@ export function ActionSelector({ character, targets, onActionComplete }: ActionS
                 <div className="flex gap-2 mt-1">
                   <Badge variant="outline">{selectedAction.actionType}</Badge>
                   {selectedAction.usesPerRound && (
-                    <Badge variant="secondary">Uses: {getActionUsesRemaining(selectedAction)}</Badge>
+                    <Badge variant="secondary">Usos: {getActionUsesRemaining(selectedAction)}</Badge>
                   )}
                 </div>
               </div>
@@ -114,10 +114,10 @@ export function ActionSelector({ character, targets, onActionComplete }: ActionS
           {(selectedAction.actionType === "attack" || selectedAction.actionType === "spell") && (
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium block mb-2">Select Target</label>
+                <label className="text-sm font-medium block mb-2">Selecionar alvo</label>
                 <Select value={selectedTargetId} onValueChange={setSelectedTargetId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Choose a target" />
+                    <SelectValue placeholder="Escolhe alvo" />
                   </SelectTrigger>
                   <SelectContent>
                     {targets.map((target) => (
@@ -137,7 +137,7 @@ export function ActionSelector({ character, targets, onActionComplete }: ActionS
                         <div>
                           <h4 className="text-sm font-medium mb-2 flex items-center">
                             <Target className="mr-2 h-4 w-4" />
-                            Attack Roll (vs AC {selectedTarget?.ac})
+                            Rolagem de ataque (vs CA {selectedTarget?.ac})
                           </h4>
                           <DiceRoller
                             defaultFormula={`1d20+${selectedAction.attackBonus}`}
@@ -152,7 +152,7 @@ export function ActionSelector({ character, targets, onActionComplete }: ActionS
                           <div>
                             <h4 className="text-sm font-medium mb-2 flex items-center">
                               <Zap className="mr-2 h-4 w-4" />
-                              Damage Roll
+                              Rolar dano
                             </h4>
                             <DiceRoller
                               defaultFormula={selectedAction.damageFormula}

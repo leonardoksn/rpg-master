@@ -10,13 +10,14 @@ export default async function CombatPage({ params }: { params: { id?: string } }
   }
 
   try {
-    const data = await db.combats.findById(id)
+    const data = await db.combats.findById(id);
+    const characters = await db.characters.findAll();
 
     if (!data) {
       return <div>Failed to load combat</div>;
     }
 
-    return <CombatSession combatSession={data} />;
+    return <CombatSession combatSession={data} availableCharacters={characters} />;
   } catch (error) {
     console.error("Error fetching combat session:", error);
     return <div>Something went wrong loading the combat session.</div>;

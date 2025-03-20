@@ -16,6 +16,7 @@ import { characterSizes } from "@/lib/data"
 import { attributes, saves, skills } from "@/lib/expertise"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 
 export default function CharacterSelected({ character, id }: { character: ICharacterData, id: string }) {
@@ -31,6 +32,7 @@ export default function CharacterSelected({ character, id }: { character: IChara
         others: character.otherStats
     })
 
+    const router = useRouter();
     // State for actions, bonus actions, reactions, and passives
     const [actions, setActions] = useState<Action[]>(character.actions)
 
@@ -40,61 +42,6 @@ export default function CharacterSelected({ character, id }: { character: IChara
 
     const [passives, setPassives] = useState<PassiveAbility[]>(character.passives)
 
-
-    const addAction = (type: ActionTiming) => {
-        const newAction = {
-            id: Date.now().toString(),
-            name: "",
-            description: "",
-            actionType: "ability" as ActionType,
-            timing: type,
-            usesPerRound: 1,
-            currentUses: 0,
-        }
-
-        switch (type) {
-            case "action":
-                setActions([...actions, newAction])
-                break
-            case "bonus":
-                setBonusActions([...bonusActions, newAction])
-                break
-            case "reaction":
-                setReactions([...reactions, newAction])
-                break
-        }
-    }
-
-    const removeAction = (id: string, type: ActionTiming) => {
-        switch (type) {
-            case "action":
-                setActions(actions.filter((action) => action.id !== id))
-                break
-            case "bonus":
-                setBonusActions(bonusActions.filter((action) => action.id !== id))
-                break
-            case "reaction":
-                setReactions(reactions.filter((action) => action.id !== id))
-                break
-        }
-    }
-
-    const addPassive = () => {
-        setPassives([
-            ...passives,
-            {
-                id: Date.now().toString(),
-                name: "",
-                description: "",
-                usesPerDay: undefined,
-                currentUses: 0,
-            },
-        ])
-    }
-
-    const removePassive = (id: string) => {
-        setPassives(passives.filter((passive) => passive.id !== id))
-    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -136,7 +83,7 @@ export default function CharacterSelected({ character, id }: { character: IChara
         try {
             // Call the createCharacter action with the collected data
             await updateCharacter(id, data);
-            // router.push("/characters");
+            router.push("/characters");
         } catch (error) {
             console.error("Error creating character:", error);
             // Here you could add error handling, like showing a toast notification

@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { CharacterTemplateSelector } from "./character-template-selector"
 
-export default function CreationCombat({ characters }: { characters: Record<string, ICharacterData> }) {
+export default function CreationCombat({ characters }: { characters?: Record<string, ICharacterData> }) {
 
     const router = useRouter()
     const [combatName, setCombatName] = useState("Novo Combate")
@@ -77,10 +77,10 @@ export default function CreationCombat({ characters }: { characters: Record<stri
                 <Button variant="ghost" size="icon" asChild className="mr-2">
                     <Link href="/combat">
                         <ArrowLeft className="h-4 w-4" />
-                        <span className="sr-only">Back</span>
+                        <span className="sr-only">Voltar</span>
                     </Link>
                 </Button>
-                <h1 className="text-3xl font-bold">Start New Combat</h1>
+                <h1 className="text-3xl font-bold">Iniciar combate</h1>
             </div>
 
             <form onSubmit={handleSubmit}>

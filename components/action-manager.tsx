@@ -26,11 +26,13 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
         description: "",
         actionType: "ability",
         timing: actionType,
-        usesPerRound: 1,
         currentUses: 0,
         attackBonus: undefined,
+        usesPerRound: undefined,
         damageFormula: undefined,
         range: undefined,
+        cost: undefined,
+        actions: undefined,
     })
 
     // Create a new action
@@ -41,7 +43,7 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
             description: formState.description || "",
             actionType: (formState.actionType as ActionType) || "ability",
             timing: actionType,
-            usesPerRound: formState.usesPerRound || 1,
+            usesPerRound: formState.usesPerRound,
             currentUses: 0,
         }
 
@@ -65,7 +67,7 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
             description: "",
             actionType: "ability",
             timing: actionType,
-            usesPerRound: 1,
+            usesPerRound: undefined,
             currentUses: 0,
             attackBonus: undefined,
             damageFormula: undefined,
@@ -131,7 +133,7 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
             description: "",
             actionType: "ability",
             timing: actionType,
-            usesPerRound: 1,
+            usesPerRound: undefined,
             currentUses: 0,
             attackBonus: undefined,
             damageFormula: undefined,
@@ -165,7 +167,7 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Badge variant="outline">{action.actionType}</Badge>
-                                        {action.usesPerRound && <Badge variant="secondary">Uses: {action.usesPerRound}/round</Badge>}
+                                        {action.usesPerRound && <Badge variant="secondary">Usos: {action.usesPerRound}/rodada</Badge>}
                                         <Button
                                             variant="ghost"
                                             size="icon"
@@ -175,7 +177,7 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                             }}
                                         >
                                             <Edit className="h-4 w-4" />
-                                            <span className="sr-only">Edit</span>
+                                            <span className="sr-only">Editar</span>
                                         </Button>
                                         <Button
                                             variant="ghost"
@@ -186,7 +188,7 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                             }}
                                         >
                                             <Trash2 className="h-4 w-4" />
-                                            <span className="sr-only">Delete</span>
+                                            <span className="sr-only">Deletar</span>
                                         </Button>
                                     </div>
                                 </div>
@@ -199,17 +201,17 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                             <div className="grid grid-cols-3 gap-2 mt-2">
                                                 {action.attackBonus !== undefined && (
                                                     <div className="text-sm">
-                                                        <span className="font-medium">Attack:</span> +{action.attackBonus}
+                                                        <span className="font-medium">Ataque:</span> +{action.attackBonus}
                                                     </div>
                                                 )}
                                                 {action.damageFormula && (
                                                     <div className="text-sm">
-                                                        <span className="font-medium">Damage:</span> {action.damageFormula}
+                                                        <span className="font-medium">Dano:</span> {action.damageFormula}
                                                     </div>
                                                 )}
                                                 {action.range && (
                                                     <div className="text-sm">
-                                                        <span className="font-medium">Range:</span> {action.range}m
+                                                        <span className="font-medium">Alcance:</span> {action.range}m
                                                     </div>
                                                 )}
                                             </div>
@@ -221,12 +223,12 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                     <div className="p-3 space-y-4">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div className="space-y-2">
-                                                <Label htmlFor={`edit-name-${action.id}`}>Name</Label>
+                                                <Label htmlFor={`edit-name-${action.id}`}>Nome</Label>
                                                 <Input
                                                     id={`edit-name-${action.id}`}
                                                     value={formState.name}
                                                     onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-                                                    placeholder="Action name"
+                                                    placeholder="Nome da ação"
                                                 />
                                             </div>
                                             <div className="space-y-2">
@@ -236,13 +238,13 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                                     onValueChange={(value) => setFormState({ ...formState, actionType: value as ActionType })}
                                                 >
                                                     <SelectTrigger id={`edit-type-${action.id}`}>
-                                                        <SelectValue placeholder="Select type" />
+                                                        <SelectValue placeholder="Selecione o tipo" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        <SelectItem value="attack">Attack</SelectItem>
-                                                        <SelectItem value="spell">Spell</SelectItem>
-                                                        <SelectItem value="ability">Ability</SelectItem>
-                                                        <SelectItem value="other">Other</SelectItem>
+                                                        <SelectItem value="attack">Ataque</SelectItem>
+                                                        <SelectItem value="spell">Feitiço</SelectItem>
+                                                        <SelectItem value="ability">Habilidade</SelectItem>
+                                                        <SelectItem value="other">Outro</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             </div>
@@ -254,13 +256,13 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                                 id={`edit-desc-${action.id}`}
                                                 value={formState.description}
                                                 onChange={(e) => setFormState({ ...formState, description: e.target.value })}
-                                                placeholder="Describe what this action does"
+                                                placeholder="Descreva o que esta ação faz"
                                             />
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                                             <div className="space-y-2">
-                                                <Label htmlFor={`edit-attack-${action.id}`}>Attack Bonus</Label>
+                                                <Label htmlFor={`edit-attack-${action.id}`}>Bônus de ataque</Label>
                                                 <Input
                                                     id={`edit-attack-${action.id}`}
                                                     type="number"
@@ -275,7 +277,7 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <Label htmlFor={`edit-damage-${action.id}`}>Damage Formula</Label>
+                                                <Label htmlFor={`edit-damage-${action.id}`}>Fórmula de dano</Label>
                                                 <Input
                                                     id={`edit-damage-${action.id}`}
                                                     value={formState.damageFormula || ""}
@@ -284,7 +286,7 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <Label htmlFor={`edit-range-${action.id}`}>Range (meters)</Label>
+                                                <Label htmlFor={`edit-range-${action.id}`}>Alcance (metros)</Label>
                                                 <Input
                                                     id={`edit-range-${action.id}`}
                                                     value={formState.range || ""}
@@ -293,16 +295,15 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <Label htmlFor={`edit-uses-${action.id}`}>Uses Per Round</Label>
+                                                <Label htmlFor={`edit-uses-${action.id}`}>Usos por rodada</Label>
                                                 <Input
                                                     id={`edit-uses-${action.id}`}
                                                     type="number"
-                                                    min="1"
-                                                    value={formState.usesPerRound || 1}
+                                                    value={formState.usesPerRound}
                                                     onChange={(e) =>
                                                         setFormState({
                                                             ...formState,
-                                                            usesPerRound: Number.parseInt(e.target.value),
+                                                            usesPerRound: parseInt(e.target.value),
                                                         })
                                                     }
                                                     placeholder="1"
@@ -313,11 +314,11 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                         <div className="flex justify-end gap-2">
                                             <Button variant="outline" onClick={handleCancelEdit}>
                                                 <X className="mr-2 h-4 w-4" />
-                                                Cancel
+                                                Cancelar
                                             </Button>
                                             <Button onClick={() => handleUpdateAction(action.id)}>
                                                 <Save className="mr-2 h-4 w-4" />
-                                                Save Changes
+                                                Salvar alterações
                                             </Button>
                                         </div>
                                     </div>
@@ -331,19 +332,34 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
             {editingId === "new" ? (
                 <Card>
                     <CardContent className="p-4 space-y-4">
-                        <h3 className="font-medium">New {actionTypeLabel}</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <h3 className="font-medium">Nova {actionTypeLabel}</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="new-name">Name</Label>
+                                <Label htmlFor="name">Nome</Label>
                                 <Input
-                                    id="new-name"
+                                    id="name"
                                     value={formState.name}
                                     onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-                                    placeholder={`${actionTypeLabel} name`}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="new-type">Type</Label>
+                                <Label htmlFor="cost">Custo</Label>
+                                <Input
+                                    id="cost"
+                                    value={formState.cost}
+                                    onChange={(e) => setFormState({ ...formState, cost: Number.parseInt(e.target.value) })}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="actions">Qtd. de ações</Label>
+                                <Input
+                                    id="actions"
+                                    value={formState.actions}
+                                    onChange={(e) => setFormState({ ...formState, actions: Number.parseInt(e.target.value) })}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="new-type">Tipo</Label>
                                 <Select
                                     value={formState.actionType as string}
                                     onValueChange={(value) => setFormState({ ...formState, actionType: value as ActionType })}
@@ -352,17 +368,17 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                         <SelectValue placeholder="Select type" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="attack">Attack</SelectItem>
-                                        <SelectItem value="spell">Spell</SelectItem>
-                                        <SelectItem value="ability">Ability</SelectItem>
-                                        <SelectItem value="other">Other</SelectItem>
+                                        <SelectItem value="attack">Ataque</SelectItem>
+                                        <SelectItem value="spell">Feitiço</SelectItem>
+                                        <SelectItem value="ability">Habilidade</SelectItem>
+                                        <SelectItem value="other">Outro</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="new-desc">Description</Label>
+                            <Label htmlFor="new-desc">Descrição</Label>
                             <Textarea
                                 id="new-desc"
                                 value={formState.description}
@@ -373,7 +389,7 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
 
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="new-attack">Attack Bonus</Label>
+                                <Label htmlFor="new-attack">Bônus de ataque</Label>
                                 <Input
                                     id="new-attack"
                                     type="number"
@@ -388,7 +404,7 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="new-damage">Damage Formula</Label>
+                                <Label htmlFor="new-damage">Fórmula de dano</Label>
                                 <Input
                                     id="new-damage"
                                     value={formState.damageFormula || ""}
@@ -397,7 +413,7 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="new-range">Range (meters)</Label>
+                                <Label htmlFor="new-range">Alcance (metros)</Label>
                                 <Input
                                     id="new-range"
                                     value={formState.range || ""}
@@ -406,16 +422,15 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="new-uses">Uses Per Round</Label>
+                                <Label htmlFor="new-uses">Usos por rodada</Label>
                                 <Input
                                     id="new-uses"
                                     type="number"
-                                    min="1"
                                     value={formState.usesPerRound}
                                     onChange={(e) =>
                                         setFormState({
                                             ...formState,
-                                            usesPerRound: Number.parseInt(e.target.value),
+                                            usesPerRound: e.target.value ? Number.parseInt(e.target.value) : undefined,
                                         })
                                     }
                                     placeholder="1"
@@ -426,11 +441,11 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                         <div className="flex justify-end gap-2">
                             <Button variant="outline" onClick={handleCancelEdit}>
                                 <X className="mr-2 h-4 w-4" />
-                                Cancel
+                                Cancelar
                             </Button>
                             <Button onClick={handleAddAction}>
                                 <Save className="mr-2 h-4 w-4" />
-                                Add {actionTypeLabel}
+                                Adicionar {actionTypeLabel}
                             </Button>
                         </div>
                     </CardContent>
@@ -446,13 +461,13 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                             description: "",
                             actionType: "ability",
                             timing: actionType,
-                            usesPerRound: 1,
+                            usesPerRound: undefined,
                             currentUses: 0,
                         })
                     }}
                 >
                     <Plus className="mr-2 h-4 w-4" />
-                    Add {actionTypeLabel}
+                    Adicionar {actionTypeLabel}
                 </Button>
             )}
         </div>

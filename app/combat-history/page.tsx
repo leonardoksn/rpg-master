@@ -49,7 +49,7 @@ export default async function CombatHistoryPage() {
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <h4 className="text-sm font-medium mb-2">Participants:</h4>
+                  <h4 className="text-sm font-medium mb-2">Participantes:</h4>
                   <div className="flex flex-wrap gap-2">
                     {session.characters.map((character) => (
                       <Badge key={character.id} variant="outline">
@@ -60,22 +60,22 @@ export default async function CombatHistoryPage() {
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-medium mb-2">Summary:</h4>
+                  <h4 className="text-sm font-medium mb-2">Resumo:</h4>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                     <div className="p-2 bg-muted rounded-md">
-                      <div className="text-xs text-muted-foreground">Rounds</div>
+                      <div className="text-xs text-muted-foreground">Rodadas</div>
                       <div className="font-bold">{session.round}</div>
                     </div>
                     <div className="p-2 bg-muted rounded-md">
-                      <div className="text-xs text-muted-foreground">Participants</div>
+                      <div className="text-xs text-muted-foreground">Participantes</div>
                       <div className="font-bold">{session.characters.length}</div>
                     </div>
                     <div className="p-2 bg-muted rounded-md">
-                      <div className="text-xs text-muted-foreground">Actions</div>
+                      <div className="text-xs text-muted-foreground">Ações</div>
                       <div className="font-bold">{session.logs.length}</div>
                     </div>
                     <div className="p-2 bg-muted rounded-md">
-                      <div className="text-xs text-muted-foreground">Duration</div>
+                      <div className="text-xs text-muted-foreground">Duração</div>
                       <div className="font-bold">--:--</div>
                     </div>
                   </div>

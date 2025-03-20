@@ -6,15 +6,18 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { attributes, saves } from "@/lib/expertise"
-import { Activity, Footprints, Heart, Shield, Zap } from "lucide-react"
+import { Activity, AlertTriangle, Footprints, Gauge, Heart, Zap } from "lucide-react"
 import { useState } from "react"
+import { ArmorClassEditor } from "./armor-class-editor"
 import { AttributeRoller } from "./attribute-roller"
+import { ConditionManager } from "./condition-manager"
 import { TempHPManager } from "./temp-hp-manager"
 
 interface CharacterActionPanelProps {
   character: CombatCharacter | undefined;
   allCharacters: CombatCharacter[]
   isActive: boolean;
+  onAddTempHP: (characterId: string, amount: number) => void;
   onHandleAddTempHP: (characterId: string, amount: number) => void;
   onActionComplete: (
     characterId: string,
@@ -23,14 +26,24 @@ interface CharacterActionPanelProps {
     targetId: string | null,
     attackRoll: number | null,
     damage: number | null,
-  ) => void
+  ) => void;
+  onUpdateAC?: (characterId: string, newAC: number) => void;
+  onRemoveCondition?: (characterId: string, conditionType: ConditionType) => void;
+  onAdjustIntegrity?: (characterId: string, amount: number) => void;
+  onAddCondition?: (characterId: string, condition: Condition) => void;
+
 }
 
 export function CharacterActionPanel({
   character,
   allCharacters,
   onActionComplete,
-  onHandleAddTempHP
+  onHandleAddTempHP,
+  onUpdateAC,
+  isActive,
+  onAdjustIntegrity,
+  onRemoveCondition,
+  onAddCondition
 }: CharacterActionPanelProps) {
   if (!character) {
     return null;
@@ -39,9 +52,6 @@ export function CharacterActionPanel({
 
   const handleAddTempHP = (characterId: string, amount: number) => {
     onHandleAddTempHP(characterId, amount);
-    // This function will be passed to the parent component through props
-    // For now, we'll just log it
-    console.log(`Adding ${amount} temporary HP to ${characterId}`)
   }
 
   const handleActionComplete = (
@@ -75,10 +85,12 @@ export function CharacterActionPanel({
                 )}
               </span>
             </div>
-            <div className="flex items-center">
-              <Shield className="mr-1 h-4 w-4 text-blue-500" />
-              <span>CA {character.ac}</span>
-            </div>
+            <ArmorClassEditor
+              characterId={character.id}
+              characterName={character.name}
+              currentAC={character.ac}
+              onUpdateAC={onUpdateAC || (() => { })}
+            />
             {character.energy && (
               <div className="flex items-center">
                 <Zap className="mr-1 h-4 w-4 text-yellow-500" />
@@ -93,11 +105,32 @@ export function CharacterActionPanel({
               currentTempHP={character.health.temporary}
               onAddTempHP={handleAddTempHP}
             />
+            {character.integrity && (
+              <div className="flex items-center">
+                <Gauge className="mr-1 h-4 w-4 text-amber-500" />
+                <span>
+                  INT {character.integrity.current}/{character.integrity.max}
+                </span>
+              </div>
+            )}
           </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-sm font-medium mb-2 flex items-center">
+              <AlertTriangle className="h-4 w-4 mr-2 text-orange-500" />
+              Condições
+            </h3>
+            <ConditionManager
+              characterId={character.id}
+              characterName={character.name}
+              conditions={character.conditions || []}
+              onAddCondition={onAddCondition || (() => { })}
+              onRemoveCondition={onRemoveCondition || (() => { })}
+            />
+          </div>
           <div className="flex items-center gap-1 text-sm">
             <Activity className="h-4 w-4" />
             <span className="font-medium">Iniciativa:</span>

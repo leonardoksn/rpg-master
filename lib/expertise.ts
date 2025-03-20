@@ -47,8 +47,8 @@ export const attributes: Array<{ label: string, value: AttributesEnum }> = [
 ];
 
 export const saves: Array<{ label: string; value: SavesEnum }> = [
+  { label: "Astúcia", value: SavesEnum.cunning },
   { label: "Fortitude", value: SavesEnum.fortitude },
   { label: "Reflexos", value: SavesEnum.reflexes },
   { label: "Vontade", value: SavesEnum.willpower },
-  { label: "Astúcia", value: SavesEnum.cunning },
 ]
