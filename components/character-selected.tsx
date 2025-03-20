@@ -181,7 +181,7 @@ export default function CharacterSelected({ character, id }: { character: IChara
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="actionsPerTurn">Ações por turno</Label>
-                                    <Input id="actionsPerTurn" defaultValue={character.actionsPerTurn} type="number" min="1" placeholder="1" />
+                                    <Input id="actionsPerTurn" name="actionsPerTurn" defaultValue={character.actionsPerTurn} type="number" min="1" placeholder="1" />
                                 </div>
                             </div>
 
@@ -319,7 +319,7 @@ export default function CharacterSelected({ character, id }: { character: IChara
                     <Card>
                         <CardHeader>
                             <CardTitle>Ações e Habilidades</CardTitle>
-                            <CardDescription>Add the character's actions and abilities</CardDescription>
+                            <CardDescription>Adicione as ações e habilidades do personagem</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <Tabs defaultValue="actions">
@@ -329,7 +329,6 @@ export default function CharacterSelected({ character, id }: { character: IChara
                                     <TabsTrigger value="reactions">Reações</TabsTrigger>
                                     <TabsTrigger value="passives">Habilidades Passivas</TabsTrigger>
                                 </TabsList>
-
                                 <TabsContent value="actions">
                                     <ActionManager actions={actions} actionType="action" onChange={setActions} />
                                 </TabsContent>

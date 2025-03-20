@@ -57,8 +57,7 @@ interface Character {
   actions: Action[]
   bonusActions: Action[]
   reactions: Action[]
-  passives: PassiveAbility[]
-
+  passives: PassiveAbility[];
   conditions: Condition[]
   notes: string
 }

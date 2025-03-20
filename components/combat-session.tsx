@@ -111,9 +111,8 @@ export default function CombatSession({ combatSession, availableCharacters }: { 
     }
 
     const handleActionComplete = async (
+        actionProps: Action,
         characterId: string,
-        actionName: string,
-        actionTiming: string,
         targetId: string | null,
         attackRoll: number | null,
         damage: number | null,
@@ -130,8 +129,8 @@ export default function CombatSession({ combatSession, availableCharacters }: { 
             turn: activeIndex + 1,
             characterId: character.id,
             characterName: character.name,
-            action: actionName,
-            actionTiming: actionTiming as ActionTiming,
+            action: actionProps.name,
+            actionTiming: actionProps.timing as ActionTiming,
             target: target
                 ? {
                     id: target.id,
@@ -184,10 +183,13 @@ export default function CombatSession({ combatSession, availableCharacters }: { 
                 // Find the action that was used
                 const updatedChar = structuredClone(c);
 
-                if (actionTiming === "action") {
-                    updatedChar.actionsUsed = (updatedChar.actionsUsed || 0) + 1
+                if (actionProps.timing === "action") {
+                    updatedChar.actionsUsed = (updatedChar.actionsUsed || 0) + (actionProps.actions || 1)
+                    if(updatedChar.energy){
+                        updatedChar.energy.current -= actionProps.cost ? actionProps.cost : 0
+                    }
                     updatedChar.actions = updatedChar.actions.map((action) => {
-                        if (action.name === actionName) {
+                        if (action.name === actionProps.name) {
                             return {
                                 ...action,
                                 currentUses: (action.currentUses || 0) + 1,
@@ -195,10 +197,13 @@ export default function CombatSession({ combatSession, availableCharacters }: { 
                         }
                         return action
                     })
-                } else if (actionTiming === "bonus") {
-                    updatedChar.bonusActionsUsed = (updatedChar.bonusActionsUsed || 0) + 1
+                } else if (actionProps.timing === "bonus") {
+                    updatedChar.bonusActionsUsed =(updatedChar.actionsUsed || 0) + (actionProps.actions || 1)
+                    if(updatedChar.energy){
+                        updatedChar.energy.current -= actionProps.cost ? actionProps.cost : 0
+                    }
                     updatedChar.bonusActions = updatedChar.bonusActions.map((action) => {
-                        if (action.name === actionName) {
+                        if (action.name === actionProps.name) {
                             return {
                                 ...action,
                                 currentUses: (action.currentUses || 0) + 1,
@@ -206,10 +211,13 @@ export default function CombatSession({ combatSession, availableCharacters }: { 
                         }
                         return action
                     })
-                } else if (actionTiming === "reaction") {
-                    updatedChar.reactionsUsed = (updatedChar.reactionsUsed || 0) + 1
+                } else if (actionProps.timing === "reaction") {
+                    updatedChar.reactionsUsed = (updatedChar.actionsUsed || 0) + (actionProps.actions || 1)
+                    if(updatedChar.energy){
+                        updatedChar.energy.current -= actionProps.cost ? actionProps.cost : 0
+                    }
                     updatedChar.reactions = updatedChar.reactions.map((action) => {
-                        if (action.name === actionName) {
+                        if (action.name === actionProps.name) {
                             return {
                                 ...action,
                                 currentUses: (action.currentUses || 0) + 1,

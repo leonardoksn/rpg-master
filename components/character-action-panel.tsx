@@ -20,9 +20,8 @@ interface CharacterActionPanelProps {
   onAddTempHP: (characterId: string, amount: number) => void;
   onHandleAddTempHP: (characterId: string, amount: number) => void;
   onActionComplete: (
+    action: Action,
     characterId: string,
-    actionName: string,
-    actionTiming: string,
     targetId: string | null,
     attackRoll: number | null,
     damage: number | null,
@@ -55,12 +54,12 @@ export function CharacterActionPanel({
   }
 
   const handleActionComplete = (
-    action: any,
+    action: Action,
     target: Character | null,
     attackRoll: number | null,
     damage: number | null,
   ) => {
-    onActionComplete(character.id, action.name, action.timing || "action", target?.id || null, attackRoll, damage)
+    onActionComplete(action, character.id, target?.id || null, attackRoll, damage)
   }
 
   return (
@@ -198,7 +197,7 @@ export function CharacterActionPanel({
                   />
                 ))
               }
-              {!character.saves && <p className="text-center text-muted-foreground py-4">No saving throws defined</p>}
+              {!character.saves && <p className="text-center text-muted-foreground py-4">Nenhum teste de resistência definido</p>}
             </div>
           </TabsContent>
 
@@ -225,7 +224,7 @@ export function CharacterActionPanel({
                       <h3 className="font-medium">{passive.name}</h3>
                       {passive.usesPerDay && (
                         <Badge variant="outline">
-                          Uses: {passive.currentUses || 0}/{passive.usesPerDay}
+                          Usos: {passive.currentUses || 0}/{passive.usesPerDay}
                         </Badge>
                       )}
                     </div>
@@ -233,14 +232,14 @@ export function CharacterActionPanel({
                     {passive.usesPerDay && (
                       <div className="flex justify-end mt-2">
                         <Button size="sm" variant="outline">
-                          Use
+                          Uso
                         </Button>
                       </div>
                     )}
                   </div>
                 ))
               ) : (
-                <p className="text-center text-muted-foreground py-4">No passive abilities defined</p>
+                <p className="text-center text-muted-foreground py-4">Sem passivas definidas</p>
               )}
             </div>
           </TabsContent>

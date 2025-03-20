@@ -253,7 +253,7 @@ export default function NewCharacterPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="actionsPerTurn">Ações por turno</Label>
-                  <Input id="actionsPerTurn" type="number" min="1" placeholder="1" />
+                  <Input id="actionsPerTurn" name="actionsPerTurn" type="number" min="1" placeholder="1" />
                 </div>
               </div>
 

@@ -104,6 +104,12 @@ export function ActionSelector({ character, targets, onActionComplete }: ActionS
                   {selectedAction.usesPerRound && (
                     <Badge variant="secondary">Usos: {getActionUsesRemaining(selectedAction)}</Badge>
                   )}
+                  {selectedAction.cost && (
+                    <Badge variant="secondary">Custo: {selectedAction.cost}</Badge>
+                  )}
+                  {selectedAction.actions && (
+                    <Badge variant="secondary">Ações: {selectedAction.actions}</Badge>
+                  )}
                 </div>
               </div>
               {selectedAction.range && <Badge variant="secondary">Range: {selectedAction.range} m</Badge>}
@@ -196,7 +202,7 @@ interface ActionListProps {
 
 function ActionList({ actions, selectedActionId, onSelectAction, showUsesRemaining = false }: ActionListProps) {
   if (actions.length === 0) {
-    return <div className="text-center py-4 text-muted-foreground">No actions available</div>
+    return <div className="text-center py-4 text-muted-foreground">Nenhuma ação disponível</div>
   }
 
   return (
@@ -212,6 +218,15 @@ function ActionList({ actions, selectedActionId, onSelectAction, showUsesRemaini
             <span className="font-medium">{action.name}</span>
             <div className="flex gap-2">
               <Badge variant="outline">{action.actionType}</Badge>
+              {
+                action.cost &&
+                <Badge variant="outline">Custo: {action.cost}</Badge>
+              }
+              {
+                action.actions &&
+                <Badge variant="outline">Ações: {action.actions}</Badge>
+              }
+
               {showUsesRemaining && action.usesPerRound && (
                 <Badge variant={(action.currentUses || 0) >= action.usesPerRound ? "destructive" : "secondary"}>
                   {action.currentUses || 0}/{action.usesPerRound}

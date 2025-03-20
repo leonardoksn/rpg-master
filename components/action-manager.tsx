@@ -11,10 +11,10 @@ import { ChevronDown, ChevronUp, Edit, Plus, Save, Trash2, X } from "lucide-reac
 import { useState } from "react"
 
 interface ActionManagerProps {
-    actions: Action[]
-    actionType: ActionTiming
-    onChange: (actions: Action[]) => void
-}
+    actions: Action[];
+    actionType: ActionTiming;
+    onChange: (actions: Action[]) => void;
+};
 
 export function ActionManager({ actions, actionType, onChange }: ActionManagerProps) {
     const [editingId, setEditingId] = useState<string | null>(null)
@@ -72,6 +72,9 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
             attackBonus: undefined,
             damageFormula: undefined,
             range: undefined,
+            actions: undefined,
+            cost: undefined,
+            savingThrow: undefined
         })
 
         setEditingId(null)
@@ -86,10 +89,15 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                     name: formState.name || action.name,
                     description: formState.description || action.description,
                     actionType: (formState.actionType as ActionType) || action.actionType,
-                    usesPerRound: formState.usesPerRound || action.usesPerRound,
+                    usesPerRound: formState.usesPerRound,
                     attackBonus: formState.attackBonus,
                     damageFormula: formState.damageFormula,
                     range: formState.range,
+                    actions: formState.actions,
+                    cost: formState.cost,
+                    currentUses: formState.currentUses,
+                    timing: formState.timing,
+                    savingThrow: formState.savingThrow,
                 }
             }
             return action
@@ -115,6 +123,11 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
             attackBonus: action.attackBonus,
             damageFormula: action.damageFormula,
             range: action.range,
+            actions: action.actions,
+            cost: action.cost,
+            currentUses: action.currentUses,
+            id: action.id,
+            savingThrow: action.savingThrow
         })
         setEditingId(action.id)
         setExpandedId(action.id)
@@ -168,7 +181,10 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                     <div className="flex items-center gap-2">
                                         <Badge variant="outline">{action.actionType}</Badge>
                                         {action.usesPerRound && <Badge variant="secondary">Usos: {action.usesPerRound}/rodada</Badge>}
+                                        {action.cost && <Badge variant="secondary">Custo: {action.cost}</Badge>}
+                                        {action.actions && <Badge variant="secondary">Ações: {action.actions}</Badge>}
                                         <Button
+                                            type="button"
                                             variant="ghost"
                                             size="icon"
                                             onClick={(e) => {
@@ -180,6 +196,7 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                             <span className="sr-only">Editar</span>
                                         </Button>
                                         <Button
+                                            type="button"
                                             variant="ghost"
                                             size="icon"
                                             onClick={(e) => {
@@ -232,7 +249,34 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <Label htmlFor={`edit-type-${action.id}`}>Type</Label>
+                                                <Label htmlFor="cost">Custo</Label>
+                                                <Input
+                                                    id="cost"
+                                                    value={formState.cost === undefined ? "" : formState.cost}
+                                                    onChange={(e) =>
+                                                        setFormState({
+                                                            ...formState,
+                                                            cost: e.target.value === "" ? undefined : Number.parseInt(e.target.value),
+                                                        })
+                                                    }
+
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="actions">Qtd. de ações</Label>
+                                                <Input
+                                                    id="actions"
+                                                    value={formState.actions === undefined ? "" : formState.actions}
+                                                    onChange={(e) =>
+                                                        setFormState({
+                                                            ...formState,
+                                                            actions: e.target.value === "" ? undefined : Number.parseInt(e.target.value),
+                                                        })
+                                                    }
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor={`edit-type-${action.id}`}>Tipo</Label>
                                                 <Select
                                                     value={formState.actionType}
                                                     onValueChange={(value) => setFormState({ ...formState, actionType: value as ActionType })}
@@ -249,9 +293,8 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                                 </Select>
                                             </div>
                                         </div>
-
                                         <div className="space-y-2">
-                                            <Label htmlFor={`edit-desc-${action.id}`}>Description</Label>
+                                            <Label htmlFor={`edit-desc-${action.id}`}>Descrição</Label>
                                             <Textarea
                                                 id={`edit-desc-${action.id}`}
                                                 value={formState.description}
@@ -259,7 +302,6 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                                 placeholder="Descreva o que esta ação faz"
                                             />
                                         </div>
-
                                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                                             <div className="space-y-2">
                                                 <Label htmlFor={`edit-attack-${action.id}`}>Bônus de ataque</Label>
@@ -299,11 +341,11 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                                 <Input
                                                     id={`edit-uses-${action.id}`}
                                                     type="number"
-                                                    value={formState.usesPerRound}
+                                                    value={formState.usesPerRound === undefined ? "" : formState.usesPerRound}
                                                     onChange={(e) =>
                                                         setFormState({
                                                             ...formState,
-                                                            usesPerRound: parseInt(e.target.value),
+                                                            usesPerRound: e.target.value === "" ? undefined : Number.parseInt(e.target.value),
                                                         })
                                                     }
                                                     placeholder="1"
@@ -312,11 +354,13 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                         </div>
 
                                         <div className="flex justify-end gap-2">
-                                            <Button variant="outline" onClick={handleCancelEdit}>
+                                            <Button type="button"
+                                                variant="outline" onClick={handleCancelEdit}>
                                                 <X className="mr-2 h-4 w-4" />
                                                 Cancelar
                                             </Button>
-                                            <Button onClick={() => handleUpdateAction(action.id)}>
+                                            <Button type="button"
+                                                onClick={() => handleUpdateAction(action.id)}>
                                                 <Save className="mr-2 h-4 w-4" />
                                                 Salvar alterações
                                             </Button>
@@ -365,7 +409,7 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                     onValueChange={(value) => setFormState({ ...formState, actionType: value as ActionType })}
                                 >
                                     <SelectTrigger id="new-type">
-                                        <SelectValue placeholder="Select type" />
+                                        <SelectValue placeholder="Selecione o tipo" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="attack">Ataque</SelectItem>
@@ -376,17 +420,15 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                 </Select>
                             </div>
                         </div>
-
                         <div className="space-y-2">
                             <Label htmlFor="new-desc">Descrição</Label>
                             <Textarea
                                 id="new-desc"
                                 value={formState.description}
                                 onChange={(e) => setFormState({ ...formState, description: e.target.value })}
-                                placeholder={`Describe what this ${actionType} does`}
+                                placeholder={`Descreva o que este ${actionType} faz`}
                             />
                         </div>
-
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="new-attack">Bônus de ataque</Label>
@@ -437,13 +479,14 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                 />
                             </div>
                         </div>
-
                         <div className="flex justify-end gap-2">
-                            <Button variant="outline" onClick={handleCancelEdit}>
+                            <Button type="button"
+                                variant="outline" onClick={handleCancelEdit}>
                                 <X className="mr-2 h-4 w-4" />
                                 Cancelar
                             </Button>
-                            <Button onClick={handleAddAction}>
+                            <Button type="button"
+                                onClick={handleAddAction}>
                                 <Save className="mr-2 h-4 w-4" />
                                 Adicionar {actionTypeLabel}
                             </Button>
@@ -452,6 +495,7 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                 </Card>
             ) : (
                 <Button
+                    type="button"
                     variant="outline"
                     className="w-full"
                     onClick={() => {
