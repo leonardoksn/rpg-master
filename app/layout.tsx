@@ -10,7 +10,8 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata = {
   title: "Feiticeiros & Maldições",
   description: "Combate e gerenciamento de personagens para o sistema RPG Sorcerers and Curses",
-  generator: 'v0.dev'
+  generator: 'v0.dev',
+  icons: "/favicon.ico",
 }
 
 export default function RootLayout({
