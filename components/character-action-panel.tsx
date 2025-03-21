@@ -79,7 +79,7 @@ export function CharacterActionPanel({
               <Heart className="mr-1 h-4 w-4 text-red-500" />
               <span>
                 {character.health.current}/{character.health.max}
-                {character.health.temporary && character.health.temporary > 0 && (
+                {!!character.health.temporary && character.health.temporary > 0 && (
                   <span className="text-blue-500 ml-1">+{character.health.temporary}</span>
                 )}
               </span>

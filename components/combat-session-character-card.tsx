@@ -67,7 +67,7 @@ export default function CombatSessionCharacterCard(
                         <Heart className="inline-block h-3 w-3 mr-1" />
                         <input type="number" className="w-12 text-center text-xs border rounded" value={character.health.current} onChange={(e) => handleChange(character.id, Number(e.currentTarget.value))} min={0} max={character.health.max} />
                         <span className="ml-1">/{character.health.max}  </span>
-                        {character.health.temporary && <span className="ml-1 text-blue-500">+({character.health.temporary})</span>}
+                        {!!character.health.temporary && <span className="ml-1 text-blue-500">+({character.health.temporary})</span>}
                     </div>
                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); adjustHealth(character.id, 1); }}>
                         <PlusCircle className="h-3 w-3 text-green-500" />
