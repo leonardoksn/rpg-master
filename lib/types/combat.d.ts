@@ -109,6 +109,10 @@ interface CombatLog {
     oldValue: number;
     newValue: number;
   };
+  energyChange?: {
+    oldValue: number;
+    newValue: number;
+  };
   armorClassChange?: {
     oldValue: number;
     newValue: number;

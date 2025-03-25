@@ -15,9 +15,10 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
 import { AddCharacterDialog } from "./add-character-dialog"
-import CombatSessionCharacterCard from "./combat-session-character-card"
+import { CardCharacter } from "./card-character"
 import { CombatSessionLogs } from "./combat-session-logs"
 import { DiceRoller } from "./dice-roller"
+import { updateCharacter } from "@/actions/characters/update-character"
 
 export default function CombatSession({ combatSession, availableCharacters }: { combatSession: CombatSession; availableCharacters?: Record<string, ICharacterData> | undefined }) {
     // In a real app, we would fetch the combat session by ID
@@ -185,7 +186,7 @@ export default function CombatSession({ combatSession, availableCharacters }: { 
 
                 if (actionProps.timing === "action") {
                     updatedChar.actionsUsed = (updatedChar.actionsUsed || 0) + (actionProps.actions || 1)
-                    if(updatedChar.energy){
+                    if (updatedChar.energy) {
                         updatedChar.energy.current -= actionProps.cost ? actionProps.cost : 0
                     }
                     updatedChar.actions = updatedChar.actions.map((action) => {
@@ -198,8 +199,8 @@ export default function CombatSession({ combatSession, availableCharacters }: { 
                         return action
                     })
                 } else if (actionProps.timing === "bonus") {
-                    updatedChar.bonusActionsUsed =(updatedChar.actionsUsed || 0) + (actionProps.actions || 1)
-                    if(updatedChar.energy){
+                    updatedChar.bonusActionsUsed = (updatedChar.actionsUsed || 0) + (actionProps.actions || 1)
+                    if (updatedChar.energy) {
                         updatedChar.energy.current -= actionProps.cost ? actionProps.cost : 0
                     }
                     updatedChar.bonusActions = updatedChar.bonusActions.map((action) => {
@@ -213,7 +214,7 @@ export default function CombatSession({ combatSession, availableCharacters }: { 
                     })
                 } else if (actionProps.timing === "reaction") {
                     updatedChar.reactionsUsed = (updatedChar.actionsUsed || 0) + (actionProps.actions || 1)
-                    if(updatedChar.energy){
+                    if (updatedChar.energy) {
                         updatedChar.energy.current -= actionProps.cost ? actionProps.cost : 0
                     }
                     updatedChar.reactions = updatedChar.reactions.map((action) => {
@@ -312,20 +313,43 @@ export default function CombatSession({ combatSession, availableCharacters }: { 
     }
 
     const adjustEnergy = async (characterId: string, amount: number) => {
+        const character = characters.find((c) => c.id === characterId)
+        if (!character || !character.energy) return
+
         const updatedCharacters = characters.map((c) => {
             if (c.id === characterId && c.energy) {
                 return {
                     ...c,
                     energy: {
                         ...c.energy,
-                        current: Math.min(c.energy.max, Math.max(0, c.energy.current + amount)),
+                        current: amount,
                     },
                 }
             }
             return c
         })
+        // Log integrity change
+
+        const newLog: CombatLog = {
+            id: `log-${Date.now()}-integrity`,
+            round,
+            turn: activeIndex + 1,
+            characterId,
+            characterName: character.name,
+            action: "Integrity Change",
+            details: `${amount - character.energy.current > 0 ? "Ganhou" : "Perdeu"} ${Math.abs(amount - character.energy.current)} pontos de energia`,
+            result: "other",
+            energyChange: {
+                oldValue: character.energy.current,
+                newValue: amount,
+            },
+            timestamp: new Date().toISOString(),
+        }
+        setLogs([...logs, newLog])
         setCharacters(updatedCharacters)
         updateCombatCharacter(combatSession.id, updatedCharacters)
+        updateCombatLog(combatSession.id, [...logs, newLog])
+
     }
 
     const adjustIntegrity = (characterId: string, amount: number) => {
@@ -333,7 +357,7 @@ export default function CombatSession({ combatSession, availableCharacters }: { 
         if (!character || !character.integrity) return
 
         const oldValue = character.integrity.current
-        const newValue = Math.min(character.integrity.max, Math.max(0, oldValue + amount))
+        const newValue = amount;
 
         const updatedCharacters = characters.map((c) => {
             if (c.id === characterId) {
@@ -785,7 +809,7 @@ export default function CombatSession({ combatSession, availableCharacters }: { 
                         <CardContent>
                             <div className="space-y-2">
                                 {characters.map((character, index) => (
-                                    <CombatSessionCharacterCard
+                                    <CardCharacter
                                         removeCharacterFromCombat={removeCharacterFromCombat}
                                         addTemporaryHP={addTemporaryHP}
                                         adjustIntegrity={adjustIntegrity}

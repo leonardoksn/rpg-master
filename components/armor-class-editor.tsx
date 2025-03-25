@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Edit, Shield } from "lucide-react"
+import { Shield } from "lucide-react"
 import { useState } from "react"
 
 interface ArmorClassEditorProps {
@@ -42,11 +42,10 @@ export function ArmorClassEditor({ characterId, characterName, currentAC, onUpda
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="h-7 px-2">
-          <Shield className="h-4 w-4 mr-1 text-blue-500" />
-          CA: {currentAC}
-          <Edit className="h-3 w-3 ml-1" />
-        </Button>
+        <div className="flex items-center bg-gray-700 px-2 py-1 rounded">
+          <Shield className="h-4 w-4 text-blue-400 mr-1" />
+          <span>{currentAC}</span>
+        </div>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

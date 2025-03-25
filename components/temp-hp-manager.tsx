@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Plus, Shield } from 'lucide-react'
+import { Hourglass, Plus } from 'lucide-react'
 import { useState } from "react"
 
 interface TempHPManagerProps {
@@ -34,9 +34,8 @@ export function TempHPManager({ characterId, characterName, currentTempHP = 0, o
     return (
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="h-7 px-2">
-                    <Shield className="h-4 w-4 mr-1" />
-                    {currentTempHP > 0 ? `Temp: ${currentTempHP}` : "Ad. Temp HP"}
+                <Button variant="outline" size="sm" className="h-7 px-2 border-none text-red-300">
+                    <Hourglass className="h-4 w-4 mr-1" />
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">

@@ -64,29 +64,14 @@ export function ConditionManager({
 
   return (
     <div>
-      <div className="flex flex-wrap gap-1 mb-2">
-        {conditions.map((condition) => (
-          <Badge key={condition.type} variant="secondary" className="flex items-center gap-1">
-            {CONDITIONS[condition.type]}
-            {condition.duration && <span className="text-xs">({condition.duration})</span>}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-4 w-4 p-0 ml-1"
-              onClick={() => onRemoveCondition(characterId, condition.type)}
-            >
-              <X className="h-3 w-3" />
-              <span className="sr-only">Remover</span>
-            </Button>
-          </Badge>
-        ))}
-        {conditions.length === 0 && <span className="text-xs text-muted-foreground">Sem condições</span>}
-      </div>
-
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" size="sm" className="w-full">
-            <Plus className="h-4 w-4 mr-2" />
+          <Button
+            variant="outline"
+            size="sm"
+            className="mb-3 text-xs border-dashed border-gray-600 text-gray-400"
+          >
+            <Plus className="h-3 w-3 mr-1" />
             Adicionar condição
           </Button>
         </DialogTrigger>

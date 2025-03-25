@@ -32,7 +32,7 @@ export function RemoveCharacterDialog({ character, onRemoveCharacter }: RemoveCh
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 absolute top-2 right-2"
+          className="h-6 w-6 top-2 right-2"
           onClick={(e) => e.stopPropagation()}
         >
           <UserMinus className="h-4 w-4 text-destructive" />
