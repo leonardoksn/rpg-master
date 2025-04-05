@@ -9,7 +9,7 @@ export async function updateCharacter(id: string, data: ICharacterData) {
 
         // Aqui você implementaria a lógica real do banco de dados
         // Por exemplo, usando Prisma:
-        const characterId = await db.characters.update(id, data)
+        const characterId = await db.charactersMongo.update(id, data)
 
 
         return { success: true, characterId }

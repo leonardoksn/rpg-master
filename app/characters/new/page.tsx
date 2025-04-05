@@ -18,7 +18,7 @@ import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-
+import {toast } from "sonner"
 
 export default function NewCharacterPage() {
   const router = useRouter()
@@ -150,8 +150,19 @@ export default function NewCharacterPage() {
 
     try {
       // Call the createCharacter action with the collected data
-      await createCharacter(data);
-      router.push("/characters");
+      toast.promise(createCharacter(data),{
+        loading: "Criando personagem...",
+        success: () => {
+          router.push("/characters");
+          return "Personagem criado com sucesso!";
+        },
+        error: (error) => {
+          console.error("Error creating character:", error);
+          return "Erro ao criar personagem.";
+        },
+      })
+    
+      // router.push("/characters");
     } catch (error) {
       console.error("Error creating character:", error);
       // Here you could add error handling, like showing a toast notification

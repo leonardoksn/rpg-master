@@ -6,10 +6,9 @@ import db from "@/lib/db/db"; // Supondo que você tenha uma configuração de b
 
 export async function createCharacter(data: ICharacterData) {
     try {
-
         // Aqui você implementaria a lógica real do banco de dados
         // Por exemplo, usando Prisma:
-        const characterId = await db.characters.create(data)
+        const characterId = await db.charactersMongo.create(data)
 
 
         return { success: true, characterId }

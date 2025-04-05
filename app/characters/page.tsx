@@ -1,18 +1,16 @@
+import { charactersFindall } from "@/actions/characters/consult-characters"
 import { CharacterCard } from "@/components/character-card"
 import { Button } from "@/components/ui/button"
-import db from "@/lib/db/db"
 import { Plus } from "lucide-react"
 import Link from "next/link"
 
 export default async function CharactersPage() {
 
-  const characters = await db.characters.findAll();
+  const characters = await charactersFindall()
 
   if (!characters) {
     return <div>Carregando...</div>
   }
-
-  const charactersArray = Object.keys(characters);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -26,8 +24,8 @@ export default async function CharactersPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {charactersArray.map((id) => (
-          <CharacterCard key={id} id={id} character={characters[id] as ICharacterData} />
+        {characters.map((character) => (
+          <CharacterCard key={character.id} id={character.id} character={character as ICharacterData} />
         ))}
       </div>
     </div>

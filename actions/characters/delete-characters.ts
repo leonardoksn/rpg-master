@@ -9,7 +9,7 @@ export async function deleteCharacter(id: string) {
 
         // Aqui você implementaria a lógica real do banco de dados
         // Por exemplo, usando Prisma:
-        const characterId = await db.characters.delete(id)
+        const characterId = await db.charactersMongo.delete(id)
         console.log("Character deleted:", characterId)
 
         return { success: true, characterId }
