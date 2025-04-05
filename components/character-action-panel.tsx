@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { attributes, saves } from "@/lib/expertise"
-import { Activity, AlertTriangle, Footprints, Gauge, Heart, Zap } from "lucide-react"
+import { Activity, AlertTriangle, Bell, Footprints, Gauge, Heart, Zap } from "lucide-react"
 import { useState } from "react"
 import { ArmorClassEditor } from "./armor-class-editor"
 import { AttributeRoller } from "./attribute-roller"
@@ -130,10 +130,17 @@ export function CharacterActionPanel({
               onRemoveCondition={onRemoveCondition || (() => { })}
             />
           </div>
-          <div className="flex items-center gap-1 text-sm">
-            <Activity className="h-4 w-4" />
-            <span className="font-medium">Iniciativa:</span>
-            <span>{character.initiativeRoll}</span>
+          <div className="flex items-center gap-5 text-sm">
+            <div className="flex items-center gap-1 text-sm">
+              <Activity className="h-4 w-4" />
+              <span className="font-medium">Iniciativa:</span>
+              <span>{character.initiativeRoll}</span>
+            </div>
+            <div className="flex items-center gap-1 text-sm">
+              <Bell  className="h-4 w-4" />
+              <span className="font-medium">Atenção:</span>
+              <span>{character.otherStats.attention}</span>
+            </div>
           </div>
           {character.movement && (
             <div className="flex items-center gap-1 text-sm">

@@ -208,7 +208,7 @@ export default function NewCharacterPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="level">Nível</Label>
-                  <Input id="level" type="number" min="1" max="20" placeholder="1" />
+                  <Input id="level" name="level" type="number" min="1" placeholder="1" />
                 </div>
 
               </div>

@@ -60,6 +60,7 @@ export default function CharacterSelected({ character, id }: { character: IChara
         const data: ICharacterData = {
             name: formData.get("name") as string,
             type: characterType,
+            integrity: parseInt(formData.get("integrity") as string) || 0,
             class: formData.get("class") as string,
             level: parseInt(formData.get("level") as string) || 1,
             maxHp: parseInt(formData.get("maxHp") as string),
@@ -140,14 +141,17 @@ export default function CharacterSelected({ character, id }: { character: IChara
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="level" defaultValue={character.level}>Nível</Label>
-                                    <Input id="level" type="number" min="1" max="20" placeholder="1" />
+                                    <Input id="level" type="number" name="level" min="1" max="20" placeholder="1" />
                                 </div>
-
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="maxHp" >HP máximo</Label>
                                     <Input id="maxHp" defaultValue={character.maxHp} name="maxHp" type="number" min="1" placeholder="Insira HP máximo" required />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="integrity">Integridade na alma</Label>
+                                    <Input id="integrity" name="integrity" type="number" defaultValue={character.integrity} min="1" placeholder="Insira a integridade" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="maxEp" >PE máximo</Label>
