@@ -5,7 +5,7 @@ interface CombatSessionCharacterCardProps {
     index: number;
     activeIndex: number;
     setSelectedCharacterId: (value: SetStateAction<string | null>) => void;
-    adjustHealth: (characterId: string, amount: number) => void;
+    adjustHealth: (characterId: string, amount: number, isTemp?: boolean) => void;
     handleChange: (characterId: string, amount: number) => void;
     adjustEnergy: (characterId: string, amount: number) => Promise<void>;
     updateArmorClass: (characterId: string, newAC: number) => void;

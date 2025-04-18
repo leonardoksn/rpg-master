@@ -2,6 +2,7 @@ import { CONDITIONS } from "@/lib/constants";
 import { ChevronRight, Flame, Heart, X, Zap } from "lucide-react";
 import { ArmorClassEditor } from "./armor-class-editor";
 import { ConditionManager } from "./condition-manager";
+import { HPManager } from "./hp-manager";
 import { RemoveCharacterDialog } from "./remove-character-dialog";
 import { TempHPManager } from "./temp-hp-manager";
 import { Badge } from "./ui/badge";
@@ -74,7 +75,14 @@ export function CardCharacter({ adjustEnergy, adjustHealth, adjustIntegrity, han
 
             <div className="grid grid-cols-3 gap-2">
                 <div className="flex items-center">
-                    <Heart className={`h-4 w-4 mr-1 text${getHealthColor(character.health.current, character.health.max)}`} />
+                    <HPManager 
+                        characterId={character.id}
+                        characterName={character.name}
+                        currentHP={character.health.current}
+                        onUpdate={adjustHealth}
+                    >
+                        <Heart className={`h-4 w-4 mr-1 text${getHealthColor(character.health.current, character.health.max)}`} />
+                    </HPManager>
                     <div className="w-full bg-gray-700 rounded-full h-5 overflow-hidden">
                         <div
                             className={`h-full bg${getHealthColor(character.health.current, character.health.max)} px-1 text-xs flex items-center w-full`}

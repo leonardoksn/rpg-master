@@ -238,14 +238,34 @@ export default function CombatSession({ combatSession, availableCharacters }: { 
 
     }
 
-    const adjustHealth = (characterId: string, amount: number) => {
+    const adjustHealth = (characterId: string, amount: number, isTemp: boolean = false) => {
+
+
+
+      
         const updatedCharacters = characters.map((c) => {
             if (c.id === characterId) {
+                let tempHp = c.health.temporary;
+                let currentAmount = amount
+
+                if(isTemp && amount < 0 && !!tempHp){
+                    tempHp = tempHp + amount;
+
+                    if(tempHp < 0){
+                        currentAmount = tempHp;
+                    }else{
+                        currentAmount = 0;
+                    }
+
+                }
+
                 return {
                     ...c,
+
                     health: {
                         ...c.health,
-                        current: Math.min(c.health.max, Math.max(0, c.health.current + amount)),
+                        temporary: tempHp,
+                        current: Math.min(c.health.max, Math.max(0, c.health.current + currentAmount)),
                     },
                 }
             }
@@ -790,14 +810,15 @@ export default function CombatSession({ combatSession, availableCharacters }: { 
                                 allCharacters={characters}
                                 isActive={selectedCharacter?.id === activeCharacter.id}
                                 onActionComplete={handleActionComplete}
+                                onAdjustHealth={adjustHealth}
                             />
                         </CardContent>
                     </Card>
                     <CombatSessionLogs logs={logs} undoLastAction={undoLastAction} />
                 </div>
 
-                <div className="space-y-68">
-                    <Card>
+                <div className="space-y-68 b">
+                    <Card className="border border-slate-200 dark:border-slate-700 max-h-[960px] overflow-auto">
                         <CardHeader className="pb-2">
                             <CardTitle>Ordem de Iniciativa
                                 <Button size="icon" variant="ghost" onClick={copyIniciative}>

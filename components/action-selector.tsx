@@ -112,11 +112,20 @@ export function ActionSelector({ character, targets, onActionComplete }: ActionS
                   )}
                 </div>
               </div>
-              {selectedAction.range && <Badge variant="secondary">Range: {selectedAction.range} m</Badge>}
+              {selectedAction.range && <Badge variant="secondary">Alcance: {selectedAction.range} m</Badge>}
             </div>
             <p className="text-sm text-muted-foreground">{selectedAction.description}</p>
           </div>
-
+          {(selectedAction.damageFormula && (selectedAction.actionType === "ability" || selectedAction.actionType === "other"))
+            && (<div>
+              <h4 className="text-sm font-medium mb-2">Rolagem</h4>
+              <DiceRoller
+                defaultFormula={selectedAction.damageFormula}
+                onRoll={setAttackRoll}
+                allowManualEntry={true}
+              />
+            </div>)
+          }
           {(selectedAction.actionType === "attack" || selectedAction.actionType === "spell") && (
             <div className="space-y-4">
               <div>

@@ -398,8 +398,13 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                 <Label htmlFor="actions">Qtd. de ações</Label>
                                 <Input
                                     id="actions"
-                                    value={formState.actions}
-                                    onChange={(e) => setFormState({ ...formState, actions: Number.parseInt(e.target.value) })}
+                                    value={formState.actions === undefined ? "" : formState.actions}
+                                    onChange={(e) =>
+                                        setFormState({
+                                            ...formState,
+                                            actions: e.target.value === "" ? undefined : Number.parseInt(e.target.value),
+                                        })
+                                    }
                                 />
                             </div>
                             <div className="space-y-2">

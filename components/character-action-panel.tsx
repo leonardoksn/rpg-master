@@ -11,6 +11,7 @@ import { useState } from "react"
 import { ArmorClassEditor } from "./armor-class-editor"
 import { AttributeRoller } from "./attribute-roller"
 import { ConditionManager } from "./condition-manager"
+import { HPManager } from "./hp-manager"
 import { TempHPManager } from "./temp-hp-manager"
 
 interface CharacterActionPanelProps {
@@ -30,6 +31,7 @@ interface CharacterActionPanelProps {
   onRemoveCondition?: (characterId: string, conditionType: ConditionType) => void;
   onAdjustIntegrity?: (characterId: string, amount: number) => void;
   onAddCondition?: (characterId: string, condition: Condition) => void;
+  onAdjustHealth: (characterId: string, amount: number, isTemp?: boolean) => void
 
 }
 
@@ -42,7 +44,8 @@ export function CharacterActionPanel({
   isActive,
   onAdjustIntegrity,
   onRemoveCondition,
-  onAddCondition
+  onAddCondition,
+  onAdjustHealth
 }: CharacterActionPanelProps) {
   if (!character) {
     return null;
@@ -76,7 +79,14 @@ export function CharacterActionPanel({
           </div>
           <div className="flex items-center space-x-4 text-sm">
             <div className="flex items-center">
-              <Heart className="mr-1 h-4 w-4 text-red-500" />
+              <HPManager 
+                characterId={character.id}
+                characterName={character.name}
+                currentHP={character.health.current}
+                onUpdate={onAdjustHealth}
+              >
+                <Heart className="mr-1 h-4 w-4 text-red-500" />
+              </HPManager>
               <span>
                 {character.health.current}/{character.health.max}
                 {!!character.health.temporary && character.health.temporary > 0 && (
@@ -137,7 +147,7 @@ export function CharacterActionPanel({
               <span>{character.initiativeRoll}</span>
             </div>
             <div className="flex items-center gap-1 text-sm">
-              <Bell  className="h-4 w-4" />
+              <Bell className="h-4 w-4" />
               <span className="font-medium">Atenção:</span>
               <span>{character.otherStats.attention}</span>
             </div>
