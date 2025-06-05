@@ -127,7 +127,7 @@ export default function NewCharacterPage() {
     const data: ICharacterData = {
       name: formData.get("name") as string,
       type: characterType,
-      integrity: formData.get("integrity") ? parseInt(formData.get("integrity") as string) : undefined ,
+      integrity: formData.get("integrity") ? parseInt(formData.get("integrity") as string) : undefined,
       class: formData.get("class") as string,
       level: parseInt(formData.get("level") as string) || 1,
       maxHp: parseInt(formData.get("maxHp") as string),
@@ -259,7 +259,10 @@ export default function NewCharacterPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="notes">Notas</Label>
-                <Textarea id="notes" placeholder="Insira quaisquer notas adicionais sobre este personagem" />
+                <Textarea
+                  id="notes"
+                  name="notes"
+                  placeholder="Insira quaisquer notas adicionais sobre este personagem" />
               </div>
             </CardContent>
           </Card>

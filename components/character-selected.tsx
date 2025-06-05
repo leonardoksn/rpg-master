@@ -191,7 +191,7 @@ export default function CharacterSelected({ character, id }: { character: IChara
 
                             <div className="space-y-2">
                                 <Label htmlFor="notes">Notas</Label>
-                                <Textarea id="notes" defaultValue={character.notes} placeholder="Enter any additional notes about this character" />
+                                <Textarea name="notes" id="notes" defaultValue={character.notes} placeholder="Enter any additional notes about this character" />
                             </div>
                         </CardContent>
                     </Card>

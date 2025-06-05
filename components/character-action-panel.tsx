@@ -79,7 +79,7 @@ export function CharacterActionPanel({
           </div>
           <div className="flex items-center space-x-4 text-sm">
             <div className="flex items-center">
-              <HPManager 
+              <HPManager
                 characterId={character.id}
                 characterName={character.name}
                 currentHP={character.health.current}
@@ -177,6 +177,7 @@ export function CharacterActionPanel({
             <TabsTrigger value="saves">TR</TabsTrigger>
             <TabsTrigger value="skills">Perícias</TabsTrigger>
             <TabsTrigger value="passives">Passivas</TabsTrigger>
+            <TabsTrigger value="notes">Notas</TabsTrigger>
           </TabsList>
 
           <TabsContent value="actions">
@@ -258,6 +259,16 @@ export function CharacterActionPanel({
               ) : (
                 <p className="text-center text-muted-foreground py-4">Sem passivas definidas</p>
               )}
+            </div>
+          </TabsContent>
+          <TabsContent value="notes">
+            <div className="space-y-3">
+              {character.notes && character.notes.length > 0 ?
+                <div className="p-3 border rounded-md">
+                  <p className="text-sm text-muted-foreground mt-1">{character.notes}</p>
+                </div> : (
+                  <p className="text-center text-muted-foreground py-4">Sem notas definidas</p>
+                )}
             </div>
           </TabsContent>
         </Tabs>
