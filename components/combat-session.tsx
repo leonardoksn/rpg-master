@@ -11,18 +11,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { CONDITIONS } from "@/lib/constants"
 import { ArrowLeft, ClipboardCopy, SkipForward } from "lucide-react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { toast } from "sonner"
 import { AddCharacterDialog } from "./add-character-dialog"
 import { CardCharacter } from "./card-character"
 import { CombatSessionLogs } from "./combat-session-logs"
 import { DiceRoller } from "./dice-roller"
-import { updateCharacter } from "@/actions/characters/update-character"
 
 export default function CombatSession({ combatSession, availableCharacters }: { combatSession: CombatSession; availableCharacters?: Record<string, ICharacterData> | undefined }) {
     // In a real app, we would fetch the combat session by ID
-    const router = useRouter();
 
     const [round, setRound] = useState(combatSession.round)
     const [activeIndex, setActiveIndex] = useState(combatSession.activeCharacterIndex)
@@ -32,7 +29,26 @@ export default function CombatSession({ combatSession, availableCharacters }: { 
     const [logs, setLogs] = useState<CombatLog[]>(combatSession.logs)
     const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null)
 
-    const activeCharacter = characters[activeIndex]
+
+    const activeCharacter = useMemo(() => {
+        if (characters[activeIndex]) {
+            return characters[activeIndex];
+        }
+        if (characters[activeIndex + 1]) {
+            updateActiveCharacterIndex(combatSession.id, 0)
+            setActiveIndex(activeIndex + 1);
+            return characters[activeIndex + 1];
+        }
+        if (characters[0]) {
+            setRound(round + 1);
+            setActiveIndex(0);
+            updateRound(combatSession.id, round + 1);
+            updateActiveCharacterIndex(combatSession.id, 0)
+            return characters[0];
+        }
+        return null;
+
+    }, [characters, activeIndex]);
     const selectedCharacter = selectedCharacterId ? characters.find((c) => c.id === selectedCharacterId) : activeCharacter
 
     const nextTurn = async () => {
@@ -242,18 +258,18 @@ export default function CombatSession({ combatSession, availableCharacters }: { 
 
 
 
-      
+
         const updatedCharacters = characters.map((c) => {
             if (c.id === characterId) {
                 let tempHp = c.health.temporary;
                 let currentAmount = amount
 
-                if(isTemp && amount < 0 && !!tempHp){
+                if (isTemp && amount < 0 && !!tempHp) {
                     tempHp = tempHp + amount;
 
-                    if(tempHp < 0){
+                    if (tempHp < 0) {
                         currentAmount = tempHp;
-                    }else{
+                    } else {
                         currentAmount = 0;
                     }
 
@@ -739,7 +755,7 @@ export default function CombatSession({ combatSession, availableCharacters }: { 
 
 
         // If the active character was removed, move to the next character
-        if (characterId === activeCharacter.id) {
+        if (characterId === activeCharacter?.id) {
             // If this was the last character, go back to the first
             if (activeIndex >= characters.length - 1) {
                 setActiveIndex(0)
@@ -782,12 +798,12 @@ export default function CombatSession({ combatSession, availableCharacters }: { 
                         <CardHeader className="pb-2">
                             <CardTitle className="flex justify-between items-center">
                                 <span>
-                                    {selectedCharacterId && selectedCharacterId !== activeCharacter.id
+                                    {selectedCharacterId && selectedCharacterId !== activeCharacter?.id
                                         ? "Selecionar personagem"
                                         : "Personagem ativo"}
                                 </span>
                                 <div className="flex gap-2">
-                                    {selectedCharacterId && selectedCharacterId !== activeCharacter.id && (
+                                    {selectedCharacterId && selectedCharacterId !== activeCharacter?.id && (
                                         <Button variant="outline" onClick={() => setSelectedCharacterId(null)}>
                                             Retornar para ativo
                                         </Button>
@@ -799,19 +815,22 @@ export default function CombatSession({ combatSession, availableCharacters }: { 
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <CharacterActionPanel
-                                onAddCondition={addCondition}
-                                onRemoveCondition={removeCondition}
-                                onUpdateAC={updateArmorClass}
-                                onAddTempHP={addTemporaryHP}
-                                onAdjustIntegrity={adjustIntegrity}
-                                onHandleAddTempHP={handleTemporaryHp}
-                                character={selectedCharacter}
-                                allCharacters={characters}
-                                isActive={selectedCharacter?.id === activeCharacter.id}
-                                onActionComplete={handleActionComplete}
-                                onAdjustHealth={adjustHealth}
-                            />
+                            {
+                                selectedCharacter && <CharacterActionPanel
+                                    onAddCondition={addCondition}
+                                    onRemoveCondition={removeCondition}
+                                    onUpdateAC={updateArmorClass}
+                                    onAddTempHP={addTemporaryHP}
+                                    onAdjustIntegrity={adjustIntegrity}
+                                    onHandleAddTempHP={handleTemporaryHp}
+                                    character={selectedCharacter}
+                                    allCharacters={characters}
+                                    isActive={selectedCharacter?.id === activeCharacter?.id}
+                                    onActionComplete={handleActionComplete}
+                                    onAdjustHealth={adjustHealth}
+                                />
+                            }
+
                         </CardContent>
                     </Card>
                     <CombatSessionLogs logs={logs} undoLastAction={undoLastAction} />
