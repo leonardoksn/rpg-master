@@ -35,8 +35,6 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
         actions: undefined,
     })
 
-    console.log({ formState })
-
     // Create a new action
     const handleAddAction = () => {
         const newAction: Action = {
