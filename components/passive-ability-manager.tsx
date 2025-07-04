@@ -128,6 +128,7 @@ export function PassiveAbilityManager({ passives, onChange }: PassiveAbilityMana
                     <Button
                       variant="ghost"
                       size="icon"
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation()
                         handleEditPassive(passive)

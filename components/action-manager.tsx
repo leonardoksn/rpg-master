@@ -35,6 +35,8 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
         actions: undefined,
     })
 
+    console.log({ formState })
+
     // Create a new action
     const handleAddAction = () => {
         const newAction: Action = {
@@ -45,6 +47,12 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
             timing: actionType,
             usesPerRound: formState.usesPerRound,
             currentUses: 0,
+            actions: formState.actions,
+            cost: formState.cost,
+            attackBonus: formState.attackBonus,
+            damageFormula: formState.damageFormula,
+            range: formState.range,
+            savingThrow: formState.savingThrow,
         }
 
         if (formState.attackBonus !== undefined) {
@@ -74,7 +82,7 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
             range: undefined,
             actions: undefined,
             cost: undefined,
-            savingThrow: undefined
+            savingThrow: undefined,
         })
 
         setEditingId(null)
@@ -390,8 +398,13 @@ export function ActionManager({ actions, actionType, onChange }: ActionManagerPr
                                 <Label htmlFor="cost">Custo</Label>
                                 <Input
                                     id="cost"
-                                    value={formState.cost}
-                                    onChange={(e) => setFormState({ ...formState, cost: Number.parseInt(e.target.value) })}
+                                    value={formState.cost === undefined ? "" : formState.cost}
+                                    onChange={(e) =>
+                                        setFormState({
+                                            ...formState,
+                                            cost: e.target.value === "" ? undefined : Number.parseInt(e.target.value),
+                                        })
+                                    }
                                 />
                             </div>
                             <div className="space-y-2">
