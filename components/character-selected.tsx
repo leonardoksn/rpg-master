@@ -90,6 +90,7 @@ export default function CharacterSelected({ character, id }: { character: IChara
             // Here you could add error handling, like showing a toast notification
         }
     };
+    console.log(character)
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -140,8 +141,8 @@ export default function CharacterSelected({ character, id }: { character: IChara
                                     <Input defaultValue={character.class} id="class" name="class" placeholder="Digite a classe" required />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="level" defaultValue={character.level}>Nível</Label>
-                                    <Input id="level" type="number" name="level" min="1" max="20" placeholder="1" />
+                                    <Label htmlFor="level">Nível</Label>
+                                    <Input id="level" type="number" defaultValue={character.level} name="level" min="1" max="20" placeholder="1" />
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
